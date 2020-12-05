@@ -1,10 +1,10 @@
 
- ...The Tea Is A Lie
-# ...The Tea Is False
-# ...The Tea = 0
-# ...d Tea = 0
-# ...d t = 0
-# ...steady state
+# ...The Tea Is A Lie
+## ...The Tea Is False
+### ...The Tea = 0
+#### ...d Tea = 0
+##### ...d t = 0
+###### ...steady state
 
 ## Mesh Analysis for steady-state diffusion
 
