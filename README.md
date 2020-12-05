@@ -34,31 +34,31 @@ cd example
 
 In the following we define the diffusion coefficient as D=U*R*T where U is the mobility, R the gas constant, and T the temperature. The solubility is defined by S = c0 / gamma / exp(mu0/RT) where c0 is the standrad concentration, gamma the activity coefficient, and mu0 the standard chemical potential. For charge diffusion `c_out` divited by `S_out` is the electric potential difference over the system and the resistances are the products between the solubilities `S` and diffusion coefficients `D`. For heat diffusion `c_out` divited by `S_out` is the temperature difference over the system and the thermal conductivities are the products between the solubilities `S` and diffusion coefficients `D`.
 
-Input parameter    | Description [unit]
------------------- | -------------------
-`model_nbr`	   | model number, 0 gives Brick and Mortar [integer]
-`d`		   | width of bricks [double]
-`s`		   | horizontal spacing between bricks [double]
-`g`		   | vertical spacing between bricks [double]
-`t`		   | brick thickness [double]
-`N`		   | nbr of layers of bricks [integer]
-`omega`		   | offset ratio, negative gives random [double]
-`c_out`		   | concentration outside system [double]
-`S_out`		   | solubility outside system [double]
-`S_mv`		   | mortar solubility (verticle) [double]
-`S_mh`		   | mortar solubility (horizontal) [double]
-`S_bv`		   | brick solubility (verticle) [double]
-`S_bh`		   | brick solubility (horizontal) [double]
-`D_mv`		   | mortar diffusion coefficient (verticle) [double]
-`D_mh`		   | mortar diffusion coefficient (horizontal) [double]
-`D_bv`		   | brick diffusion coefficient (verticle) [double]
-`D_bh`		   | brick diffusion coefficient (horizontal) [double]
-`seed`		   | seed, negative gives random [integer]
-`height`	   | height of system, only relevant when loading an external mesh [double]
-`width`		   | width of system, only relevant when loading an external mesh [double]
-`load_external`	   | load external mesh, true/false [bool]
-`C`		   | number of columns of nodes [integer]
-`R`		   | number of rows of nodes [integer]
+Input parameter    |   Unit   |   Type   | Description [unit]
+------------------ | -------- | -------- | -------------------
+`model_nbr`	   | unitless | integer  | model number, 0 gives Brick and Mortar
+`d`		   | m        | double   | width of bricks
+`s`		   | m        | double   | horizontal spacing between bricks
+`g`		   | m        | double   | vertical spacing between bricks
+`t`		   | m        | double   | brick thickness
+`N`		   | unitless | integer  | nbr of layers of bricks
+`omega`		   | unitless | double   | offset ratio, negative gives random
+`c_out`		   | kg/m^3   | double   | concentration outside system
+`S_out`		   | kg/m^3   | double   | solubility outside system
+`S_mv`		   | kg/m^3   | double   | mortar solubility (verticle)
+`S_mh`		   | kg/m^3   | double   | mortar solubility (horizontal)
+`S_bv`		   | kg/m^3   | double   | brick solubility (verticle)
+`S_bh`		   | kg/m^3   | double   | brick solubility (horizontal)
+`D_mv`		   | m^2/s    | double   | mortar diffusion coefficient (verticle)
+`D_mh`		   | m^2/s    | double   | mortar diffusion coefficient (horizontal)
+`D_bv`		   | m^2/s    | double   | brick diffusion coefficient (verticle)
+`D_bh`		   | m^2/s    | double   | brick diffusion coefficient (horizontal)
+`seed`		   | unitless | integer  | seed, negative gives random
+`height`	   | m        | double   | height of system, only relevant when loading an external mesh
+`width`		   | m        | double   | width of system, only relevant when loading an external mesh
+`load_external`	   | N/A      | bool     | load external mesh, true/false
+`C`		   | unitless | integer  | number of columns of nodes
+`R`		   | unitless | integer  | number of rows of nodes
 
 Output files                | Description
 --------------------------- | -------------
