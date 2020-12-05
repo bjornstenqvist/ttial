@@ -5,7 +5,7 @@
 ###### ...d t = 0
 ...steady state
 
-This is a C++ software for calculating membrane concentration-profiles, fluxes, permeabilities, and so forth in steady-state based on Mesh Analysis. The software is built around a 2D rectangular membrane which is laterally periodic and therefore infinite, suitable for for example brick and mortar systems. The program is fundamentally constructed to model mass diffusion however it can also be used to model temperature flux and change diffusion. The major restriction of the scheme is that it assumes one constant concentration profile at the upper boundary of the system while utilizing a zink, i.e. zero concnentration, at the lower boundary. For thermal/electric diffusion the temperature/electric potential is constant at those boundaries.
+This is a C++ software for calculating membrane concentration-profiles, fluxes, permeabilities, and so forth in steady-state based on Mesh Analysis. The software is built around a 2D rectangular membrane which is laterally periodic and therefore infinite, suitable for for example brick and mortar systems. The program is fundamentally constructed to model mass diffusion however it can also be used to model temperature flux and change diffusion. The major restriction of the scheme is that it assumes one constant concentration profile at the upper boundary of the system while utilizing a zink, i.e. zero concentration, at the lower boundary. For thermal/electric diffusion the temperature/electric potential is constant at those boundaries.
 
 ## Usage
 
@@ -30,11 +30,13 @@ cd example
 ../ttial
 ~~~
 
-### Input/Output data
+### Input data
 
-In the following we define the diffusion coefficient as D=U*R*T where U is the mobility, R the gas constant, and T the temperature. The solubility is defined by S = c0 / gamma / exp(mu0/RT) where c0 is the standrad concentration, gamma the activity coefficient, and mu0 the standard chemical potential. For charge diffusion `c_out` divited by `S_out` is the electric potential difference over the system and the resistances are the products between the solubilities `S` and diffusion coefficients `D`. For heat diffusion `c_out` divited by `S_out` is the temperature difference over the system and the thermal conductivities are the products between the solubilities `S` and diffusion coefficients `D`.
+In the following we define the diffusion coefficient as D=U*R*T where U is the mobility, R the gas constant, and T the temperature. The solubility is defined by S = c0 / gamma / exp(mu0/RT) where c0 is the standard concentration, gamma the activity coefficient, and mu0 the standard chemical potential. 
+For charge diffusion `c_out` divited by `S_out` is the electric potential difference over the system and the resistances are the products between the solubilities `S` and diffusion coefficients `D`. 
+For heat diffusion `c_out` divited by `S_out` is the temperature difference over the system and the thermal conductivities are the products between the solubilities `S` and diffusion coefficients `D`.
 
-Input parameter    |   Unit   |   Type   | Description [unit]
+Input parameter    |   Unit   |   Type   | Description
 ------------------ | -------- | -------- | -------------------
 `model_nbr`	   | unitless | integer  | model number, 0 gives Brick and Mortar
 `d`		   | m        | double   | width of bricks
@@ -57,34 +59,36 @@ Input parameter    |   Unit   |   Type   | Description [unit]
 `height`	   | m        | double   | height of system, only relevant when loading an external mesh
 `width`		   | m        | double   | width of system, only relevant when loading an external mesh
 `load_external`	   | N/A      | bool     | load external mesh, true/false
-`C`		   | unitless | integer  | number of columns of nodes
-`R`		   | unitless | integer  | number of rows of nodes
+`Nc`		   | unitless | integer  | number of columns of nodes
+`Nr`		   | unitless | integer  | number of rows of nodes
 
-Output files                | Description
---------------------------- | -------------
-`conc_hor_matrix.txt`       | Concentration in the horizontal cells
-`conc_ver_matrix.txt`       | Concentration in the vertical cells
-`sh_matrix.txt`             | Solubility in the horizontal cells
-`sv_matrix.txt`             | Solubility in the vertical cells
-`j_hor_matrix.txt`          | Flux in the horizontal cells
-`j_ver_matrix.txt`          | Flux in the vertical cells
-`j_hor_vector.txt`          | Mean of amplitude of flux in each row of the horizontal cells
-`j_ver_vector.txt`          | Sum of flux in each row of the vertical cells
-`Dh_matrix.txt`             | Diffusion coefficients in the horizontal cells
-`Dv_matrix.txt`             | Diffusion coefficients in the vertical cells
-`V_matrix.txt`              | Potential in nodes in between cells
-`output.txt`                | Miscellaneous data
+### Output data
 
-Data in `output.txt`        | Description
---------------------------- | -------------
-`model`                     | Name of used model
-`K_{M_ver/out}`             | Partition coefficient between mortar (vertical) and outside
-`K_{B_ver/out}`             | Partition coefficient between bricks (vertical) and outside
-`K_{M_ver/B_ver}`           | Partition coefficient between mortar and bricks (both vertical) 
-`K_{M_hor/B_hor}`           | Partition coefficient between mortar and bricks (both horizontal) 
-`I_bot_sum`                 | Flux out of the system
-`I_top_sum`                 | Flux into the system
-`Reff`                      | Effective resistance of the whole system
-`j_ver`                     | Mean value of data in `jv_vector.txt`
-`j_hor`                     | Mean value of data in `jh_vector.txt`
-`Time`                      | Time to run the software [Days/Hours/Minutes/Seconds]
+Output files                |   Unit    | Description
+--------------------------- | --------- | -------------
+`conc_hor_matrix.txt`       |  kg/m^3   | Concentration in the horizontal cells
+`conc_ver_matrix.txt`       |  kg/m^3   | Concentration in the vertical cells
+`sh_matrix.txt`             |  kg/m^3   | Solubility in the horizontal cells
+`sv_matrix.txt`             |  kg/m^3   | Solubility in the vertical cells
+`j_hor_matrix.txt`          |  kg/m^2 s | Flux in the horizontal cells
+`j_ver_matrix.txt`          |  kg/m^2 s | Flux in the vertical cells
+`j_hor_vector.txt`          |  kg/m^2 s | Mean of amplitude of flux in each row of the horizontal cells
+`j_ver_vector.txt`          |  kg/m^2 s | Sum of flux in each row of the vertical cells
+`Dh_matrix.txt`             |  m^2/s    | Diffusion coefficients in the horizontal cells
+`Dv_matrix.txt`             |  m^2/s    | Diffusion coefficients in the vertical cells
+`V_matrix.txt`              |  unitless | Potential in nodes in between cells
+`output.txt`                |  N/A      | Miscellaneous data
+
+Data in `output.txt`        |   Unit    | Description
+--------------------------- | --------- | -------------
+`model`                     |  unitless | Name of used model
+`K_{M_ver/out}`             |  unitless | Partition coefficient between mortar (vertical) and outside
+`K_{B_ver/out}`             |  unitless | Partition coefficient between bricks (vertical) and outside
+`K_{M_ver/B_ver}`           |  unitless | Partition coefficient between mortar and bricks (both vertical) 
+`K_{M_hor/B_hor}`           |  unitless | Partition coefficient between mortar and bricks (both horizontal) 
+`I_bot_sum`                 |  kg/m^2 s | Flux out of the system
+`I_top_sum`                 |  kg/m^2 s | Flux into the system
+`Reff`                      |  s m / kg | Effective resistance of the whole system
+`j_ver`                     |  kg/m^2 s | Mean value of data in `jv_vector.txt`
+`j_hor`                     |  kg/m^2 s | Mean value of data in `jh_vector.txt`
+`Time`                      |   N/A     | Time to run the software [Days/Hours/Minutes/Seconds]

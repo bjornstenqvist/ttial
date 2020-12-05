@@ -56,9 +56,9 @@ struct InputData {
                 for(std::string line; iss >> line; )
                     result.push_back(line);
 
-                if (result.at(0).compare("R") == 0)
+                if (result.at(0).compare("Nr") == 0)
                     R = std::stoi(result.at(1));
-                if (result.at(0).compare("C") == 0)
+                if (result.at(0).compare("Nc") == 0)
                     C = std::stoi(result.at(1));
                 if (result.at(0).compare("N") == 0)
                     N = std::stoi(result.at(1));

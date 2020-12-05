@@ -11,7 +11,7 @@
  * @param DeltaV potential difference over the entire mesh of vertical resistors
  * @param output_file name of output-file
  */
-void calcNodeAbsActivities(mat &res_hor, mat &res_ver, double DeltaV, std::string output_file) {
+void calcNodeAbsActivities(mat &res_hor, mat &res_ver, double DeltaV, double dy, std::string output_file) {
 
     // initialize nodes
     std::vector<node> nodes;
@@ -43,8 +43,8 @@ void calcNodeAbsActivities(mat &res_hor, mat &res_ver, double DeltaV, std::strin
     vec I_top = vec::Zero(res_ver.cols());   // current going into top node from below
     vec I_bot = vec::Zero(res_ver.cols());   // current going into bottom node from above
     for(unsigned int c = 0; c < res_ver.cols(); c++) {
-        I_top(c) = ( V_nodes(0,c) - V_nodes(1,c) ) / nodes.at(c).upperRes;
-        I_bot(c) = ( V_nodes(res_ver.rows()-1,c) - V_nodes(res_ver.rows(),c) ) / nodes.at( (res_hor.rows()-1)*res_hor.cols() + c).lowerRes;
+        I_top(c) = ( V_nodes(0,c) - V_nodes(1,c) ) / dy / nodes.at(c).upperRes;
+        I_bot(c) = ( V_nodes(res_ver.rows()-1,c) - V_nodes(res_ver.rows(),c) ) / dy / nodes.at( (res_hor.rows()-1)*res_hor.cols() + c).lowerRes;
     }
     double I_top_sum = I_top.sum();  // current going into system
     double I_bot_sum = I_bot.sum();  // current going out of system
@@ -57,7 +57,6 @@ void calcNodeAbsActivities(mat &res_hor, mat &res_ver, double DeltaV, std::strin
     appendDataToFile(output_file,"I_top_sum   "+to_string_precision(I_top_sum)+"\n");
     appendDataToFile(output_file,"Reff   "+to_string_precision(Reff)+"\n"); // generate output to file
 }
-
 
 int main() {
     const std::chrono::steady_clock::time_point start_time = std::chrono::steady_clock::now(); // start timer
@@ -77,7 +76,8 @@ int main() {
     res_hor = varpi_hor.cwiseInverse(); // set horizontal resistance
     res_ver = varpi_ver.cwiseInverse(); // set vertical resistance
 
-    calcNodeAbsActivities(res_hor,res_ver,ipd.DLambda,output_file); // perform main calculations, i.e. get potential in nodes
+    double dy = ipd.height/double(ipd.R);
+    calcNodeAbsActivities(res_hor,res_ver,ipd.DLambda,dy,output_file); // perform main calculations, i.e. get potential in nodes
 
     // generate output and end program
     mat Lambda_mat = loadMatrix("V_matrix.txt"); // load output from 'calcNodeAbsActivities' which is written to file
@@ -92,57 +92,3 @@ int main() {
     std::cout << "Calculation successfully terminated!" << std::endl;
     return 0;
 }
-
-
-// R = delta Lambda / (- j * A)
-// A = delta X * delta Z
-// 1/R = -j * A / delta Lambda
-// 1/R/A = -j / delta Lambda
-// 
-// varpi = -j / nabla Lambda = -j / ( delta Lambda / delta Y ) = -j * delta Y / delta Lambda
-// varpi / delta Y = -j / delta Lambda
-//
-// 1/R/A = varpi / delta Y
-// varpi = delta Y / A / R
-
-
-// j = - w * nabla lambda
-// j = -w * nabla exp(mu/RT)
-// j = -w * exp(mu/RT) * nabla mu/RT
-// w = URT*c0 / gamma / lambda0
-// j = -URT*c0 / gamma / lambda0 * lambda * nabla mu/RT
-// j = -URT*c0 / gamma * a * nabla mu/RT
-// j = -URT*c * nabla mu/RT
-
-// j = -Uc * nabla mu
-// mu = mu0 + RT*ln(a)
-// nabla mu = RT/a * nabla a
-// a = gamma * c / c0
-// nabla mu = RT / gamma / c * c0 * gamma / c0 * nabla c
-// nabla mu = RT / c * nabla c
-// j = -Uc * RT / c * nabla c
-// j = -U*RT * nabla c
-// j = -D * nabla c
-
-// w = URT*c0 / gamma / lambda0
-// assume w_ref
-// w / w_ref = U/U_ref * c0 / c0_ref * gamma_ref / gamma * lambda0_ref / lambda0
-// assume c0 = c0_ref
-// w / w_ref = U/U_ref * gamma_ref / gamma * K_{M/ref}
-// assume U/U_ref = D/D_ref
-// w / w_ref = D/D_ref * gamma_ref / gamma * K_{M/ref}
-// assume gamma = gamma_ref
-// w / w_ref = D/D_ref * K_{M/ref}
-// j / w_ref = - D/D_ref * K_{M/ref} * nabla lambda
-
-
-
-
-
-
-// j = -w * exp(mu/RT) * nabla mu/RT
-// URT * c = w * lambda
-// w = URT * c / lambda
-// assumption gives:    w = D * c / lambda
-
-
