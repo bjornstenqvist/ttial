@@ -4,7 +4,7 @@
 #### ...The Tea = 0
 ##### ...d Tea = 0
 ###### ...d t = 0
-...steady state
+...steady-state
 
 
 ### Mesh Analysis for steady-state diffusion
