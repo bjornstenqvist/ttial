@@ -1,12 +1,13 @@
 
 # ...The Tea Is A Lie
-## ...The Tea Is False
-### ...The Tea = 0
-#### ...d Tea = 0
-##### ...d t = 0
-###### ...steady state
+### ...The Tea Is False
+#### ...The Tea = 0
+##### ...d Tea = 0
+###### ...d t = 0
+####### ...steady state
 
-## Mesh Analysis for steady-state diffusion
+
+### Mesh Analysis for steady-state diffusion
 
 This is a C++ software for calculating membrane concentration-profiles, fluxes, permeabilities, and so forth in steady-state based on Mesh Analysis. The software is built around a 2D rectangular membrane which is laterally periodic and therefore infinite, suitable for for example brick and mortar systems. The program is fundamentally constructed to model mass diffusion however it can also be used to model temperature flux and change diffusion. The major restriction of the scheme is that it assumes one constant concentration profile at the upper boundary of the system while utilizing a zink, i.e. zero concnentration, at the lower boundary. For thermal/electric diffusion the temperature/electric potential is constant at those boundaries.
 
