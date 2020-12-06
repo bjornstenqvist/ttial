@@ -77,7 +77,7 @@ Output files                |   Unit    | Description
 `Dh_matrix.txt`             |  m^2/s    | Diffusion coefficients in the horizontal cells
 `Dv_matrix.txt`             |  m^2/s    | Diffusion coefficients in the vertical cells
 `V_matrix.txt`              |  unitless | Potential in nodes in between cells
-`output.txt`                |  N/A      | Miscellaneous data
+`output.txt`                |  -        | Miscellaneous data
 
 Data in `output.txt`        |   Unit    | Description
 --------------------------- | --------- | -------------
@@ -86,9 +86,11 @@ Data in `output.txt`        |   Unit    | Description
 `K_{B_ver/out}`             |  unitless | Partition coefficient between bricks (vertical) and outside
 `K_{M_ver/B_ver}`           |  unitless | Partition coefficient between mortar and bricks (both vertical) 
 `K_{M_hor/B_hor}`           |  unitless | Partition coefficient between mortar and bricks (both horizontal) 
+`height`                    |  m        | Height of system
+`width`                     |  m        | Width of system
 `I_bot_sum`                 |  kg/m^2 s | Flux out of the system
 `I_top_sum`                 |  kg/m^2 s | Flux into the system
 `Reff`                      |  s m / kg | Effective resistance of the whole system
 `j_ver`                     |  kg/m^2 s | Mean value of data in `jv_vector.txt`
 `j_hor`                     |  kg/m^2 s | Mean value of data in `jh_vector.txt`
-`Time`                      |   N/A     | Time to run the software [Days/Hours/Minutes/Seconds]
+`Time`                      |   -       | Time to run the software [Days/Hours/Minutes/Seconds]

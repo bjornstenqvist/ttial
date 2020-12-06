@@ -224,7 +224,7 @@ void getGeometry(mat &s_hor, mat &s_ver, mat &D_hor, mat &D_ver, double &height,
         assert(("externally loaded matrices do not have compatible sizes" && compatibleSizes(s_ver,s_hor,D_ver,D_hor)));
         assert(("height of system must be positive" && ipd.height > 0.0));
         assert(("width of system must be positive" && ipd.width > 0.0));
-        appendDataToFile(output_file,"model  external\n");
+        appendDataToFile(output_file,"model external\n");
     } else {
         std::string name = "";
         if(ipd.model_nbr == 1) {
@@ -235,14 +235,16 @@ void getGeometry(mat &s_hor, mat &s_ver, mat &D_hor, mat &D_ver, double &height,
             std::cerr << "model not found\n";
             exit(EXIT_FAILURE);
         }
-        appendDataToFile(output_file,"model  "+name+"\n");
-        appendDataToFile(output_file,"K_{M_ver/out}  "+to_string_precision(ipd.S_mv/ipd.S_out) +"\n");
-        appendDataToFile(output_file,"K_{B_ver/out}  "+to_string_precision(ipd.S_bv/ipd.S_out) +"\n");
-        appendDataToFile(output_file,"K_{M_ver/B_ver}  "+to_string_precision(ipd.S_mv/ipd.S_bv) +"\n");
-        appendDataToFile(output_file,"K_{M_hor/B_hor}  "+to_string_precision(ipd.S_mh/ipd.S_bh) +"\n");
+        appendDataToFile(output_file,"model "+name+"\n");
+        appendDataToFile(output_file,"K_{M_ver/out} "+to_string_precision(ipd.S_mv/ipd.S_out) +"\n");
+        appendDataToFile(output_file,"K_{B_ver/out} "+to_string_precision(ipd.S_bv/ipd.S_out) +"\n");
+        appendDataToFile(output_file,"K_{M_ver/B_ver} "+to_string_precision(ipd.S_mv/ipd.S_bv) +"\n");
+        appendDataToFile(output_file,"K_{M_hor/B_hor} "+to_string_precision(ipd.S_mh/ipd.S_bh) +"\n");
         writeMatrixToFile("sh_matrix.txt",s_hor);
         writeMatrixToFile("sv_matrix.txt",s_ver);
         writeMatrixToFile("Dh_matrix.txt",D_hor);
         writeMatrixToFile("Dv_matrix.txt",D_ver);
     }
+    appendDataToFile(output_file,"height "+to_string_precision(height) +"\n");
+    appendDataToFile(output_file,"width "+to_string_precision(width) +"\n");
 }

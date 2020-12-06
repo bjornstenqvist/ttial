@@ -343,10 +343,16 @@ void calcProp(mat &varpi_hor, mat &varpi_ver, mat &s_hor, mat &s_ver, mat &V_nod
         jh(r,varpi_hor.cols()-1) = - varpi_hor(r,varpi_hor.cols()-1) * ( V_nodes(r,varpi_hor.cols()-1) - V_nodes(r,0) ) / dx;
     }
 
-    vec jva = jv.rowwise().sum();
-    vec jha = jh.cwiseAbs().rowwise().mean();
-    appendDataToFile(output_file,"j_ver   "+to_string_precision(jva.mean())+"\n"); // generate output to file
-    appendDataToFile(output_file,"j_hor   "+to_string_precision(jha.mean())+"\n"); // generate output to file
+    mat jva, jha;
+    jva.resize(jv.rows(),2);
+    jha.resize(jh.rows(),2);
+    jva.col(0) = vec::LinSpaced(jva.rows(),0.5*dy,height-0.5*dy);
+    jha.col(0) = vec::LinSpaced(jha.rows(),dy,height-dy);
+    jva.col(1) = jv.rowwise().sum();
+    jha.col(1) = jh.cwiseAbs().rowwise().mean();
+
+    appendDataToFile(output_file,"j_ver "+to_string_precision(jva.mean())+"\n"); // generate output to file
+    appendDataToFile(output_file,"j_hor "+to_string_precision(jha.mean())+"\n"); // generate output to file
     writeMatrixToFile("j_ver_vector.txt", jva);
     writeMatrixToFile("j_hor_vector.txt", jha);
     writeMatrixToFile("j_ver_matrix.txt", jv);
