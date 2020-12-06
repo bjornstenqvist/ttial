@@ -96,8 +96,6 @@ struct InputData {
                     D_bv = std::stod(result.at(1));
                 if (result.at(0).compare("D_bh") == 0)
                     D_bh = std::stod(result.at(1));
-                if (result.at(0).compare("dLambda") == 0)
-                    DLambda = std::stod(result.at(1));
                 if (result.at(0).compare("z_break") == 0)
                     z_break = std::stod(result.at(1));
                 if (result.at(0).compare("height") == 0)

@@ -15,7 +15,6 @@ D_mv          1.0   # mortar diffusion coefficient (verticle)
 D_mh          1.0   # mortar diffusion coefficient (horizontal)
 D_bv          1.0   # brick diffusion coefficient (verticle)
 D_bh          1.0   # brick diffusion coefficient (horizontal)
-DLambda       1.0   # absolute activity difference over the system
 seed          1     # seed, negative gives random
 height        5.4   # height of system, only relevant when loading an external mesh
 width         10.1  # width of system, only relevant when loading an external mesh
