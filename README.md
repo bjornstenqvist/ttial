@@ -25,10 +25,21 @@ make
 
 ### Example
 
+An example of a Brick and Mortar system can be run by executing the following commands
+
 ~~~ bash
 cd example
 ../ttial
 ~~~
+
+Alternatively it is possible to use IPython to run the software and produce figures based on the ouput by
+
+~~~ bash
+ipython brick_and_mortar.py
+~~~
+
+And finally a Jupyter Notebook is available where it is possble to run the software and produce figures based on the ouput.
+
 
 ### Input data
 
