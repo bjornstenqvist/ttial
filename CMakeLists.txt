@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.11.4 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.11 FATAL_ERROR)
 
 project(ttial)
 
@@ -11,10 +11,10 @@ include(FetchContent)
 
 ## GCC
 if (CMAKE_CXX_COMPILER_ID MATCHES "GNU")
-    add_compile_options(-Wall -Wextra -Wpedantic -Wunreachable-code -Wstrict-aliasing)
+    add_compile_options(-Wall -Wextra -Wpedantic -Wunreachable-code -Wstrict-aliasing -O2)
 ## Clang
 elseif (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-    add_compile_options(-Wall -Wextra -Wpedantic -Wunreachable-code -Wstrict-aliasing)
+    add_compile_options(-Wall -Wextra -Wpedantic -Wunreachable-code -Wstrict-aliasing -O2)
 endif()
 
 # download Eigen
@@ -26,8 +26,6 @@ FetchContent_GetProperties(eigen)
 if(NOT eigen_POPULATED)
     FetchContent_Populate(eigen)
 endif()
-
-
 
 include_directories(SYSTEM ${eigen_SOURCE_DIR})
 include_directories(${CMAKE_SOURCE_DIR})
