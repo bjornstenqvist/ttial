@@ -7,12 +7,21 @@
 #include <sstream>
 #include <cmath>
 
-struct InputData { 
+/**
+ * @brief A class for input data
+ */
+class InputData {
+
+public:
     int R, C, N, seed, model_nbr;
     double d, s, g, t, omega, S_mv, S_mh, S_bv, S_bh, S_mtv, S_mth, D_mv, D_mh, D_bv, D_bh, DLambda, z_break, height, width, c_out, S_out;
     bool load_external;
     const double inf = std::numeric_limits<double>::infinity();
 
+    /**
+     * @brief Load input data from file
+     * @param filename Name of input data file
+     */
     void loadInputData(std::string filename) {
         std::string line;
         std::ifstream myfile (filename);
@@ -132,5 +141,8 @@ struct InputData {
         DLambda = c_out / S_out;
     }
 
+    /**
+     * @brief Constructor
+     */
     InputData(std::string filename) { loadInputData(filename); }
 };

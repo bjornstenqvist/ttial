@@ -14,13 +14,13 @@
 void calcNodeAbsActivities(mat &res_hor, mat &res_ver, double DeltaV, double dy, std::string output_file) {
 
     // initialize nodes
-    std::vector<node> nodes;
+    std::vector<Node> nodes;
     int nbr_of_nodes = res_hor.rows()*res_hor.cols();
     nodes.resize(nbr_of_nodes);
     int cnt = 0;
     for(unsigned int r = 1; r <= res_hor.rows(); r++)
         for(unsigned int c = 1; c <= res_hor.cols(); c++) {
-            node node_tmp;
+            Node node_tmp;
             node_tmp.initNode(res_hor,res_ver,c,r,res_hor.cols(),res_hor.rows());
             nodes.at(cnt++) = node_tmp;
         }
