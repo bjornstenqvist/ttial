@@ -2,18 +2,36 @@
 #include "auxiliary.h"
 #include "nodes.h"
 
-void fillGeometryWithTunnels(mat &Am_v, mat &Am_h, mat &Bm_v, mat &Bm_h, double As, double Bs, int xc) {
-    Am_v(0,xc) = As;
-    Bm_v(0,xc) = Bs;
-    Am_h(0,xc) = As;
-    Bm_h(0,xc) = Bs;
+/**
+ * @brief A class for geometry 
+ */
+class Geometry
+{
+  public:
+    void fillGeometryWithTunnels(mat &A_mat, mat &B_mat, double A_sca, double B_sca, int x_start);
+    void fillGeometryWithCircles(mat &A_mat, mat &B_mat, double A_sca, double B_sca, std::vector<double> xv, std::vector<double> yv, std::vector<double> rcv, double dx, double dy, double L, double offset);
+    void fillGeometryWithRectangles(mat &A_mat, mat &B_mat, double A_sca, double B_sca, std::vector<double> xv, std::vector<double> yv, double d, double t, double dx, double dy, double L, double offset);
+    void brickAndMortar(mat &s_hor, mat &s_ver, mat &D_hor, mat &D_ver, double &height, double &width, InputData ipd, std::string &name);
+    void brickAndMortarDualLinear(mat &s_hor, mat &s_ver, mat &D_hor, mat &D_ver, double &height, double &width, InputData ipd, std::string &name);
+    void getGeometry(mat &s_hor, mat &s_ver, mat &D_hor, mat &D_ver, double &height, double &width, InputData ipd, std::string output_file);
+};
+
+/**
+ * @brief Fills geometry with tunnels
+ * @param A_mat Matrix A
+ * @param B_mat Matrix B
+ * @param A_sca Value in tunnel in matrix A
+ * @param B_sca Value in tunnel in matrix B
+ * @param x_start Starting-column in matrix for tunnel
+ */
+void Geometry::fillGeometryWithTunnels(mat &A_mat, mat &B_mat, double A_sca, double B_sca, int x_start) {
+    A_mat(0,x_start) = A_sca;
+    B_mat(0,x_start) = B_sca;
     int dir = 0;
 
-    for(int r = 1; r < Am_h.rows(); r++) {
-        Am_v(r,xc) = As;
-        Bm_v(r,xc) = Bs;
-        Am_h(r,xc) = As;
-        Bm_h(r,xc) = Bs;
+    for(int r = 1; r < A_mat.rows(); r++) {
+        A_mat(r,x_start) = A_sca;
+        B_mat(r,x_start) = B_sca;
 
         if(dir == 0) {
             double rand = randomUnit(-1.5,1.5);
@@ -31,22 +49,34 @@ void fillGeometryWithTunnels(mat &Am_v, mat &Am_h, mat &Bm_v, mat &Bm_h, double 
         } else
             std::cout << "Something is wrong!" << std::endl;
 
-        xc += dir;
-        if(xc < 0) xc = Am_v.cols()-1;
-        if(xc >= Am_v.cols()) xc = 0;
+        x_start += dir;
+        if(x_start < 0) x_start = A_mat.cols()-1;
+        if(x_start >= A_mat.cols()) x_start = 0;
 
-        Am_v(r,xc) = As;
-        Bm_v(r,xc) = Bs;
-        Am_h(r,xc) = As;
-        Bm_h(r,xc) = Bs;
+        A_mat(r,x_start) = A_sca;
+        B_mat(r,x_start) = B_sca;
     }
-    Am_v(Am_v.rows()-1,xc) = As;
-    Bm_v(Am_v.rows()-1,xc) = Bs;
+    A_mat(A_mat.rows()-1,x_start) = A_sca;
+    B_mat(B_mat.rows()-1,x_start) = B_sca;
 }
 
-void fillGeometryWithCircles(mat &Am, mat &Bm, double As, double Bs, std::vector<double> xv, std::vector<double> yv, std::vector<double> rcv, double dx, double dy, double L, double offset) {
-    for(unsigned int r = 0; r < Am.rows(); r++)
-        for(unsigned int c = 0; c < Am.cols(); c++) {
+/**
+ * @brief Fills geometry with circles
+ * @param A_mat Matrix A
+ * @param B_mat Matrix B
+ * @param A_sca Value inside circles in matrix A
+ * @param B_sca Value inside circles in matrix B
+ * @param xv Vector of x-values for circle centers
+ * @param yv Vector of y-values for circle centers
+ * @param rcv Vector of radius-values for circles
+ * @param dx bin-width
+ * @param dy bin-height
+ * @param L Lateral period
+ * @param offset For vertical components 'offset=0.0', while for horizontal components 'offset=1.0'
+ */
+void Geometry::fillGeometryWithCircles(mat &A_mat, mat &B_mat, double A_sca, double B_sca, std::vector<double> xv, std::vector<double> yv, std::vector<double> rcv, double dx, double dy, double L, double offset) {
+    for(unsigned int r = 0; r < A_mat.rows(); r++)
+        for(unsigned int c = 0; c < A_mat.cols(); c++) {
             double x = ( double(c) + 0.5 ) * dx; // center of resistance
             double y = ( double(2*r) + 0.5 + offset ) * dy; // the 'two' counts one vertical layer and one horizontal layer
 
@@ -55,18 +85,33 @@ void fillGeometryWithCircles(mat &Am, mat &Bm, double As, double Bs, std::vector
                 double yn = std::fabs(y - yv.at(i));
 
                 if( xn*xn + yn*yn < rcv.at(i)*rcv.at(i)) {
-                    Am(r,c) = As;
-                    Bm(r,c) = Bs;
+                    A_mat(r,c) = A_sca;
+                    B_mat(r,c) = B_sca;
                     break;
                 }
             }
         }
 }
 
-void fillGeometryWithRectangles(mat &Am, mat &Bm, double As, double Bs, std::vector<double> xv, std::vector<double> yv, double d, double t, double dx, double dy, double L, double offset) {
+/**
+ * @brief Fills geometry with rectangles
+ * @param A_mat Matrix A
+ * @param B_mat Matrix B
+ * @param A_sca Value inside circles in matrix A
+ * @param B_sca Value inside circles in matrix B
+ * @param xv Vector of x-values for rectangle centers
+ * @param yv Vector of y-values for rectangle centers
+ * @param d Rectangle width
+ * @param t Rectangle height
+ * @param dx bin-width
+ * @param dy bin-height
+ * @param L Lateral period
+ * @param offset For vertical components 'offset=0.0', while for horizontal components 'offset=1.0'
+ */
+void Geometry::fillGeometryWithRectangles(mat &A_mat, mat &B_mat, double A_sca, double B_sca, std::vector<double> xv, std::vector<double> yv, double d, double t, double dx, double dy, double L, double offset) {
     assert(xv.size() == yv.size());
-    for(unsigned int r = 0; r < Am.rows(); r++)
-        for(unsigned int c = 0; c < Am.cols(); c++) {
+    for(unsigned int r = 0; r < A_mat.rows(); r++)
+        for(unsigned int c = 0; c < A_mat.cols(); c++) {
             double x = ( double(c) + 0.5 ) * dx; // center of resistance
             double y = ( double(2*r) + 0.5 + offset ) * dy; // the 'two' counts one vertical layer and one horizontal layer
 
@@ -75,15 +120,27 @@ void fillGeometryWithRectangles(mat &Am, mat &Bm, double As, double Bs, std::vec
                 double yn = std::fabs(y - yv.at(i));
 
                 if(xn < d/2.0 && yn < t/2.0) {
-                    Am(r,c) = As;
-                    Bm(r,c) = Bs;
+                    A_mat(r,c) = A_sca;
+                    B_mat(r,c) = B_sca;
                     break;
                 }
             }
         }
 }
 
-void brickAndMortar(mat &s_hor, mat &s_ver, mat &D_hor, mat &D_ver, double &height, double &width, InputData ipd, std::string &name) {
+/**
+ * @brief Get solubility and diffusion coefficient matrices for a brick and mortar system
+ * @param s_hor Matrix of horizontal solubilities (will be set)
+ * @param s_ver Matrix of vertical solubilities (will be set)
+ * @param D_hor Matrix of horizontal diffusion coefficients (will be set)
+ * @param D_ver Matrix of vertical diffusion coefficients (will be set)
+ * @param height Height of system (will be set)
+ * @param width Width of system (will be set)
+ * @param ipd Input data for the system
+ * @param name Name of system (will be set)
+ * @note All input except 'ipd' is set using this function. All input data is supplied in 'ipd'.
+ */
+void Geometry::brickAndMortar(mat &s_hor, mat &s_ver, mat &D_hor, mat &D_ver, double &height, double &width, InputData ipd, std::string &name) {
     assert(("brick thickness cannot be negatve" && ipd.t >= 0));
     assert(("brick width cannot be negatve" && ipd.d >= 0));
     assert(("vertical spacing between bricks cannot be negatve" && ipd.g >= 0));
@@ -144,7 +201,23 @@ void brickAndMortar(mat &s_hor, mat &s_ver, mat &D_hor, mat &D_ver, double &heig
     fillGeometryWithRectangles(s_hor,D_hor,ipd.S_bh,ipd.D_bh,xv,yv,ipd.d,ipd.t,res_width,res_hight,width,1.0);
 }
 
-void brickAndMortarDualLinear(mat &s_hor, mat &s_ver, mat &D_hor, mat &D_ver, double &height, double &width, InputData ipd, std::string &name) {
+/**
+ * @brief Get solubility and diffusion coefficient matrices for a brick and mortar system where the solubility is a linear function of the depth.
+ * @param s_hor Matrix of horizontal solubilities (will be set)
+ * @param s_ver Matrix of vertical solubilities (will be set)
+ * @param D_hor Matrix of horizontal diffusion coefficients (will be set)
+ * @param D_ver Matrix of vertical diffusion coefficients (will be set)
+ * @param height Height of system (will be set)
+ * @param width Width of system (will be set)
+ * @param ipd Input data for the system
+ * @param name Name of system (will be set)
+ * @note All input except 'ipd' is set using this function. All input data is supplied in 'ipd'. The solubility 'S' is described as a function of the depth 'z' as
+     * @f[
+     *     S(z) = \left[S_{mt} + \left(\frac{S_{m} - S_{mt}}{z_{break}} \right)\cdot z\right]\theta(z_{break}-z) + S_m\cdot\theta(z-z_{break})
+     * @f]
+     * where @f$ \theta(z) @f$ is the Heaviside step function.
+ */
+void Geometry::brickAndMortarDualLinear(mat &s_hor, mat &s_ver, mat &D_hor, mat &D_ver, double &height, double &width, InputData ipd, std::string &name) {
     assert(("brick thickness cannot be negatve" && ipd.t >= 0));
     assert(("brick width cannot be negatve" && ipd.d >= 0));
     assert(("vertical spacing between bricks cannot be negatve" && ipd.g >= 0));
@@ -215,7 +288,19 @@ void brickAndMortarDualLinear(mat &s_hor, mat &s_ver, mat &D_hor, mat &D_ver, do
     fillGeometryWithRectangles(s_hor,D_hor,ipd.S_bh,ipd.D_bh,xv,yv,ipd.d,ipd.t,res_width,res_hight,width,1.0);
 }
 
-void getGeometry(mat &s_hor, mat &s_ver, mat &D_hor, mat &D_ver, double &height, double &width, InputData ipd, std::string output_file) {
+/**
+ * @brief Get geometry and properties of membrane
+ * @param s_hor Matrix of horizontal solubilities (will be set)
+ * @param s_ver Matrix of vertical solubilities (will be set)
+ * @param D_hor Matrix of horizontal diffusion coefficients (will be set)
+ * @param D_ver Matrix of vertical diffusion coefficients (will be set)
+ * @param height Height of system (will be set)
+ * @param width Width of system (will be set)
+ * @param ipd Input data for the system
+ * @param output_file Name of output-file
+ * @note All input except 'ipd' and 'output_file' is set using this function. All input data is supplied in 'ipd'.
+ */
+void Geometry::getGeometry(mat &s_hor, mat &s_ver, mat &D_hor, mat &D_ver, double &height, double &width, InputData ipd, std::string output_file) {
     if(ipd.load_external) {
         s_ver = loadMatrix("sv_matrix.txt");
         s_hor = loadMatrix("sh_matrix.txt");

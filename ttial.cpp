@@ -70,7 +70,8 @@ int main() {
     // get geometry
     mat s_hor, s_ver, D_hor, D_ver, varpi_hor, varpi_ver, res_hor, res_ver; // initiate matrices
     double height, width; // initiate height and width of system
-    getGeometry(s_hor,s_ver,D_hor,D_ver,height,width,ipd,output_file); // get geometry
+    Geometry geo;
+    geo.getGeometry(s_hor,s_ver,D_hor,D_ver,height,width,ipd,output_file); // get geometry
     varpi_hor = s_hor.cwiseProduct(D_hor); // set horizontal momentum permittivity
     varpi_ver = s_ver.cwiseProduct(D_ver); // set vertical momentum permittivity
     res_hor = varpi_hor.cwiseInverse(); // set horizontal resistance
