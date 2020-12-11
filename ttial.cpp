@@ -86,9 +86,7 @@ int main() {
 
     std::chrono::steady_clock::time_point now = std::chrono::steady_clock::now(); // stop timer
     double timed = double(std::chrono::duration_cast<std::chrono::milliseconds>(now - start_time).count())/1000.0; // calculate elapsed time
-
-    std::string str = "Time "+std::to_string(int(timed/86400.0))+"D"+std::to_string(int(timed/3600.0))+"H"+std::to_string(int(timed/60.0))+"M"+std::to_string(int(timed))+"S\n"; 
-    appendDataToFile(output_file,str); // write elapsed time to file
+    appendDataToFile(output_file,getTimeString(timed)); // write elapsed time to file
 
     std::cout << "Calculation successfully terminated!" << std::endl;
     return 0;

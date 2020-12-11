@@ -242,6 +242,8 @@ void Geometry::brickAndMortarDualLinear(mat &s_hor, mat &s_ver, mat &D_hor, mat 
 
     assert(("vertical top resistance in mortar cannot be negative" && ipd.S_mtv >= 0));
     assert(("horizontal top resistance in mortar cannot be negative" && ipd.S_mth >= 0));
+    assert(("vertical top resistance in mortar cannot be negative" && ipd.D_mtv >= 0));
+    assert(("horizontal top resistance in mortar cannot be negative" && ipd.D_mth >= 0));
     assert(("breaking-point between non-zero and zero resistance gradient in mortar cannot be negative" && ipd.z_break >= 0));
     assert(("breaking-point between non-zero and zero resistance gradient in mortar cannot lie outside of system" && ipd.z_break <= height));
 
@@ -265,6 +267,22 @@ void Geometry::brickAndMortarDualLinear(mat &s_hor, mat &s_ver, mat &D_hor, mat 
         double y = ( double(2*r) + 0.5 ) * res_hight; // the 'two' counts one vertical layer and one horizontal layer
         if( y < ipd.z_break)
             s_hor.row(r) = vec::Ones(s_hor.cols())*( k*y + m );
+    }
+
+    k = (ipd.D_mtv - ipd.D_mv)/(0.0 - ipd.z_break);
+    m = ipd.D_mtv;
+    for(int r = 0; r < D_ver.rows(); r++) {
+        double y = ( double(2*r) + 0.5 ) * res_hight; // the 'two' counts one vertical layer and one horizontal layer
+        if( y < ipd.z_break)
+            D_ver.row(r) = vec::Ones(D_ver.cols())*( k*y + m );
+    }
+
+    k = (ipd.D_mth - ipd.D_mh)/(0.0 - ipd.z_break);
+    m = ipd.D_mth;
+    for(int r = 0; r < D_hor.rows(); r++) {
+        double y = ( double(2*r) + 0.5 ) * res_hight; // the 'two' counts one vertical layer and one horizontal layer
+        if( y < ipd.z_break)
+            D_hor.row(r) = vec::Ones(D_hor.cols())*( k*y + m );
     }
 
     // calculate brick centers

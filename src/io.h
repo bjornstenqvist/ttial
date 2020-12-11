@@ -14,7 +14,7 @@ class InputData {
 
 public:
     int R, C, N, seed, model_nbr;
-    double d, s, g, t, omega, S_mv, S_mh, S_bv, S_bh, S_mtv, S_mth, D_mv, D_mh, D_bv, D_bh, DLambda, z_break, height, width, c_out, S_out;
+    double d, s, g, t, omega, S_mv, S_mh, S_bv, S_bh, S_mtv, S_mth, D_mtv, D_mth, D_mv, D_mh, D_bv, D_bh, DLambda, z_break, height, width, c_out, S_out;
     bool load_external;
     const double inf = std::numeric_limits<double>::infinity();
 
@@ -42,6 +42,8 @@ public:
         S_bh = -0.1;
         S_mtv = -0.1;
         S_mth = -0.1;
+        D_mtv = -0.1;
+        D_mth = -0.1;
         D_mv = -0.1;
         D_mh = -0.1;
         D_bv = -0.1;
@@ -97,6 +99,10 @@ public:
                     S_mtv = std::stod(result.at(1));
                 if (result.at(0).compare("S_mth") == 0)
                     S_mth = std::stod(result.at(1));
+                if (result.at(0).compare("D_mtv") == 0)
+                    D_mtv = std::stod(result.at(1));
+                if (result.at(0).compare("D_mth") == 0)
+                    D_mth = std::stod(result.at(1));
                 if (result.at(0).compare("D_mv") == 0)
                     D_mv = std::stod(result.at(1));
                 if (result.at(0).compare("D_mh") == 0)

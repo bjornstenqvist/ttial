@@ -300,6 +300,18 @@ std::vector<bool> findEmptyRows(const mat &Rinv, const vec &Iex, const double li
     return empty_both;
 }
 
+std::string getTimeString(double timed) {
+    int days = int(timed/86400.0);
+    timed -= double(days)*86400.0;
+    int hours = int(timed/3600.0);
+    timed -= double(hours)*3600.0;
+    int minutes = int(timed/60.0);
+    timed -= double(minutes)*60.0;
+    int seconds = int(timed);
+    std::string str = "Time "+std::to_string(days)+"D"+std::to_string(hours)+"H"+std::to_string(minutes)+"M"+std::to_string(seconds)+"S\n";
+    return str;
+}
+
 /**
  * @brief Adds one row to the input matrix from above and one from below, with given values.
  * @param top value for each column in the top row of the new matrix
@@ -351,8 +363,8 @@ void calcProp(mat &varpi_hor, mat &varpi_ver, mat &s_hor, mat &s_ver, mat &V_nod
     jva.col(1) = jv.rowwise().sum();
     jha.col(1) = jh.cwiseAbs().rowwise().mean();
 
-    appendDataToFile(output_file,"j_ver "+to_string_precision(jva.mean())+"\n"); // generate output to file
-    appendDataToFile(output_file,"j_hor "+to_string_precision(jha.mean())+"\n"); // generate output to file
+    appendDataToFile(output_file,"j_ver "+to_string_precision(jva.col(1).mean())+"\n"); // generate output to file
+    appendDataToFile(output_file,"j_hor "+to_string_precision(jha.col(1).mean())+"\n"); // generate output to file
     writeMatrixToFile("j_ver_vector.txt", jva);
     writeMatrixToFile("j_hor_vector.txt", jha);
     writeMatrixToFile("j_ver_matrix.txt", jv);
