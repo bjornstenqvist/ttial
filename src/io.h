@@ -16,6 +16,7 @@ class InputData {
         int R, C, N, seed, model_nbr;
         double d, s, g, t, omega, S_mv, S_mh, S_bv, S_bh, S_mtv, S_mth, D_mtv, D_mth, D_mv, D_mh, D_bv, D_bh, DLambda, z_break, height, width, c_out, S_out; // DLambda superfluous?
         bool load_external;
+        std::string input_folder, output_folder, output_file;
         const double inf = std::numeric_limits<double>::infinity();
 
         int time_steps, sample;
@@ -62,6 +63,10 @@ class InputData {
             c_out = -0.1;
 
             load_external = false;
+
+	    input_folder = "";
+	    output_folder = "";
+	    output_file = "output.txt";
 
             time_steps = -1;
             sample = -1;
@@ -137,6 +142,12 @@ class InputData {
                     if (result.at(0).compare("load_external") == 0)
                         if(!result.at(1).compare("true"))
                             load_external = true;
+                    if (result.at(0).compare("input_folder") == 0)
+                        input_folder = result.at(1)+"/";
+                    if (result.at(0).compare("output_folder") == 0)
+                        output_folder = result.at(1)+"/";
+                    if (result.at(0).compare("output_file") == 0)
+                        output_file = result.at(1);
 
                     if (result.at(0).compare("time_steps") == 0)
                         time_steps = std::stoi(result.at(1));

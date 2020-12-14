@@ -16,7 +16,7 @@ class Geometry
         void fillGeometryWithRectanglesVer(mat &A_mat, mat &B_mat, double A_sca, double B_sca, std::vector<double> xv, std::vector<double> yv, double d, double t, double width, double height);
         void brickAndMortar(mat &s_hor, mat &s_ver, mat &s_nodes, mat &D_hor, mat &D_ver, double &height, double &width, InputData ipd, std::string &name);
         void brickAndMortarDualLinear(mat &s_hor, mat &s_ver, mat &s_nodes, mat &D_hor, mat &D_ver, double &height, double &width, InputData ipd, std::string &name);
-        void getGeometry(mat &s_hor, mat &s_ver, mat &s_nodes, mat &D_hor, mat &D_ver, InputData &ipd, std::string output_file);
+        void getGeometry(mat &s_hor, mat &s_ver, mat &s_nodes, mat &D_hor, mat &D_ver, InputData &ipd);
         void checkInputForBrickAndMortar(InputData ipd);
         void getBricks(InputData ipd, std::vector<double> &xv, std::vector<double> &yv);
 };
@@ -391,21 +391,20 @@ void Geometry::brickAndMortarDualLinear(mat &s_hor, mat &s_ver, mat &s_nodes, ma
  * @param D_hor Matrix of horizontal diffusion coefficients (will be set)
  * @param D_ver Matrix of vertical diffusion coefficients (will be set)
  * @param ipd Input data for the system
- * @param output_file Name of output-file
- * @note All input except 'ipd' and 'output_file' is set using this function. All input data is supplied in 'ipd'.
+ * @note All input except 'ipd' is set using this function. All input data is supplied in 'ipd'.
  * @todo Check 's_nodes' size for load_external.
  */
-void Geometry::getGeometry(mat &s_hor, mat &s_ver, mat &s_nodes, mat &D_hor, mat &D_ver, InputData &ipd, std::string output_file) {
+void Geometry::getGeometry(mat &s_hor, mat &s_ver, mat &s_nodes, mat &D_hor, mat &D_ver, InputData &ipd) {
     if(ipd.load_external) {
-        s_ver = loadMatrix("sv_matrix.txt");
-        s_hor = loadMatrix("sh_matrix.txt");
-        s_nodes = loadMatrix("sn_matrix.txt");
-        D_ver = loadMatrix("Dv_matrix.txt");
-        D_hor = loadMatrix("Dh_matrix.txt");
+        s_ver = loadMatrix(ipd.input_folder+"sv_matrix.txt");
+        s_hor = loadMatrix(ipd.input_folder+"sh_matrix.txt");
+        s_nodes = loadMatrix(ipd.input_folder+"sn_matrix.txt");
+        D_ver = loadMatrix(ipd.input_folder+"Dv_matrix.txt");
+        D_hor = loadMatrix(ipd.input_folder+"Dh_matrix.txt");
         assert(("externally loaded matrices do not have compatible sizes" && compatibleSizes(s_ver,s_hor,D_ver,D_hor)));
         assert(("height of system must be positive" && ipd.height > 0.0));
         assert(("width of system must be positive" && ipd.width > 0.0));
-        appendDataToFile(output_file,"model external\n");
+        appendDataToFile(ipd.output_file,"model external\n");
     } else {
         std::string name = "";
         if(ipd.model_nbr == 1) {
@@ -416,17 +415,17 @@ void Geometry::getGeometry(mat &s_hor, mat &s_ver, mat &s_nodes, mat &D_hor, mat
             std::cerr << "model not found\n";
             exit(EXIT_FAILURE);
         }
-        appendDataToFile(output_file,"model "+name+"\n");
-        appendDataToFile(output_file,"K_{M_ver/out} "+to_string_precision(ipd.S_mv/ipd.S_out) +"\n");
-        appendDataToFile(output_file,"K_{B_ver/out} "+to_string_precision(ipd.S_bv/ipd.S_out) +"\n");
-        appendDataToFile(output_file,"K_{M_ver/B_ver} "+to_string_precision(ipd.S_mv/ipd.S_bv) +"\n");
-        appendDataToFile(output_file,"K_{M_hor/B_hor} "+to_string_precision(ipd.S_mh/ipd.S_bh) +"\n");
-        writeMatrixToFile("sh_matrix.txt",s_hor);
-        writeMatrixToFile("sv_matrix.txt",s_ver);
-        writeMatrixToFile("sn_matrix.txt",s_nodes);
-        writeMatrixToFile("Dh_matrix.txt",D_hor);
-        writeMatrixToFile("Dv_matrix.txt",D_ver);
+        appendDataToFile(ipd.output_file,"model "+name+"\n");
+        appendDataToFile(ipd.output_file,"K_{M_ver/out} "+to_string_precision(ipd.S_mv/ipd.S_out) +"\n");
+        appendDataToFile(ipd.output_file,"K_{B_ver/out} "+to_string_precision(ipd.S_bv/ipd.S_out) +"\n");
+        appendDataToFile(ipd.output_file,"K_{M_ver/B_ver} "+to_string_precision(ipd.S_mv/ipd.S_bv) +"\n");
+        appendDataToFile(ipd.output_file,"K_{M_hor/B_hor} "+to_string_precision(ipd.S_mh/ipd.S_bh) +"\n");
+        writeMatrixToFile(ipd.output_folder+"sh_matrix.txt",s_hor);
+        writeMatrixToFile(ipd.output_folder+"sv_matrix.txt",s_ver);
+        writeMatrixToFile(ipd.output_folder+"sn_matrix.txt",s_nodes);
+        writeMatrixToFile(ipd.output_folder+"Dh_matrix.txt",D_hor);
+        writeMatrixToFile(ipd.output_folder+"Dv_matrix.txt",D_ver);
     }
-    appendDataToFile(output_file,"height "+to_string_precision(ipd.height) +"\n");
-    appendDataToFile(output_file,"width "+to_string_precision(ipd.width) +"\n");
+    appendDataToFile(ipd.output_file,"height "+to_string_precision(ipd.height) +"\n");
+    appendDataToFile(ipd.output_file,"width "+to_string_precision(ipd.width) +"\n");
 }

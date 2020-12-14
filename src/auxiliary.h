@@ -327,7 +327,7 @@ mat addBoundariesToMatrix(const mat &in, const double top, const double bottom) 
     return out;
 }
 
-void calcProp(mat &varpi_hor, mat &varpi_ver, mat &s_hor, mat &s_ver, mat &V_nodes, double height, double width, std::string output_file) {
+void calcProp(mat &varpi_hor, mat &varpi_ver, mat &s_hor, mat &s_ver, mat &V_nodes, double height, double width, std::string output_folder, std::string output_file) {
     assert(compatibleSizes(varpi_ver,varpi_hor,s_ver,s_hor));
     assert(V_nodes.cols() == s_hor.cols());
     assert(V_nodes.rows() == s_hor.rows()+2);
@@ -365,10 +365,10 @@ void calcProp(mat &varpi_hor, mat &varpi_ver, mat &s_hor, mat &s_ver, mat &V_nod
 
     appendDataToFile(output_file,"j_ver "+to_string_precision(jva.col(1).mean())+"\n"); // generate output to file
     appendDataToFile(output_file,"j_hor "+to_string_precision(jha.col(1).mean())+"\n"); // generate output to file
-    writeMatrixToFile("j_ver_vector.txt", jva);
-    writeMatrixToFile("j_hor_vector.txt", jha);
-    writeMatrixToFile("j_ver_matrix.txt", jv);
-    writeMatrixToFile("j_hor_matrix.txt", jh);
-    writeMatrixToFile("conc_ver_matrix.txt", concV);
-    writeMatrixToFile("conc_hor_matrix.txt", concH);
+    writeMatrixToFile(output_folder+"j_ver_vector.txt", jva);
+    writeMatrixToFile(output_folder+"j_hor_vector.txt", jha);
+    writeMatrixToFile(output_folder+"j_ver_matrix.txt", jv);
+    writeMatrixToFile(output_folder+"j_hor_matrix.txt", jh);
+    writeMatrixToFile(output_folder+"conc_ver_matrix.txt", concV);
+    writeMatrixToFile(output_folder+"conc_hor_matrix.txt", concH);
 }

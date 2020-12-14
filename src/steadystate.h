@@ -10,7 +10,7 @@
  * @param DeltaV potential difference over the entire mesh of vertical resistors
  * @param output_file name of output-file
  */
-void calcNodeAbsActivities(mat &res_hor, mat &res_ver, double DeltaV, double dy, std::string output_file) {
+void calcNodeAbsActivities(mat &res_hor, mat &res_ver, double DeltaV, double dy, std::string output_folder, std::string output_file) {
 
     // initialize nodes
     std::vector<Node> nodes;
@@ -36,7 +36,7 @@ void calcNodeAbsActivities(mat &res_hor, mat &res_ver, double DeltaV, double dy,
     vec V = R*I;
     mat V_nodes = convertVector2Matrix(V,res_hor.rows(),res_hor.cols()); // convert potential in nodes from vector- to matrix-shape
     V_nodes = addBoundariesToMatrix(V_nodes,DeltaV,0.0);                  // add boundaries to potential matrix
-    writeMatrixToFile("V_matrix.txt",V_nodes);                  // write potential to file
+    writeMatrixToFile(output_folder+"V_matrix.txt",V_nodes);                  // write potential to file
 
     // assert steady-state, and prepares for calculation of effective resistance
     vec I_top = vec::Zero(res_ver.cols());   // current going into top node from below
@@ -57,11 +57,11 @@ void calcNodeAbsActivities(mat &res_hor, mat &res_ver, double DeltaV, double dy,
     appendDataToFile(output_file,"Reff "+to_string_precision(Reff)+"\n"); // generate output to file
 }
 
-void steadystate(InputData ipd, mat res_hor, mat res_ver, mat varpi_hor, mat varpi_ver, mat s_hor, mat s_ver, double height, double width, std::string output_file) {
+void steadystate(InputData ipd, mat res_hor, mat res_ver, mat varpi_hor, mat varpi_ver, mat s_hor, mat s_ver) {
     double dy = ipd.height/double(ipd.R);
-    calcNodeAbsActivities(res_hor,res_ver,ipd.DLambda,dy,output_file); // perform main calculations, i.e. get potential in nodes
+    calcNodeAbsActivities(res_hor,res_ver,ipd.DLambda,dy,ipd.output_folder,ipd.output_file); // perform main calculations, i.e. get potential in nodes
 
     // generate output and end program
-    mat Lambda_mat = loadMatrix("V_matrix.txt"); // load output from 'calcNodeAbsActivities' which is written to file
-    calcProp(varpi_hor,varpi_ver,s_hor,s_ver,Lambda_mat,height,width,output_file); // calculate concentrations and fluxes
+    mat Lambda_mat = loadMatrix(ipd.output_folder+"V_matrix.txt"); // load output from 'calcNodeAbsActivities' which is written to file
+    calcProp(varpi_hor,varpi_ver,s_hor,s_ver,Lambda_mat,ipd.height,ipd.width,ipd.output_folder,ipd.output_file); // calculate concentrations and fluxes
 }

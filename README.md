@@ -23,7 +23,7 @@ cmake .
 make
 ~~~
 
-### Example
+### Examples
 
 #### Steady State
 
@@ -31,7 +31,7 @@ A steady state example of a Brick and Mortar system can be run by executing the 
 
 ~~~ bash
 cd examples/steadystate
-../../ttial
+../../ttial input.txt
 ~~~
 
 Alternatively it is possible to use the Jupyter Notebook `brick_and_mortar.ipynb` in the same folder.
@@ -51,7 +51,7 @@ ipython brick_and_mortar.py
 
 ~~~ bash
 cd examples/nonsteadystate
-../../advacuum
+../../advacuum input.txt
 ~~~
 
 
@@ -81,12 +81,14 @@ Input parameter    |   Unit   |   Type   | Description
 `D_bv`		   | m^2/s    | double   | brick diffusion coefficient (verticle)
 `D_bh`		   | m^2/s    | double   | brick diffusion coefficient (horizontal)
 `seed`		   | unitless | integer  | seed, negative gives random
+`Nc`		   | unitless | integer  | number of columns of nodes
+`Nr`		   | unitless | integer  | number of rows of nodes
 `height`	   | m        | double   | height of system, only relevant when loading an external mesh
 `width`		   | m        | double   | width of system, only relevant when loading an external mesh
 `load_external`	   | N/A      | bool     | load external mesh, true/false
-`Nc`		   | unitless | integer  | number of columns of nodes
-`Nr`		   | unitless | integer  | number of rows of nodes
-`output_folder`    | N/A      | string   | folder in which output is put, current directory if not given [FIX]
+`input_folder`     | N/A      | string   | folder from which input is loaded, default: current directory, only relevant when loading an external mesh 
+`output_folder`    | N/A      | string   | folder in which output is put, default:  current directory
+`output_file`      | N/A      | string   | name of output-file, default: output.txt
 
 #### Exclusive non-steady state input
 

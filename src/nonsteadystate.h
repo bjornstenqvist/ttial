@@ -84,8 +84,8 @@ void nonsteadystate(InputData ipd, mat s_nodes, mat varpi_hor, mat varpi_ver) {
         correctNegative(conc_t);
         lambda_t = conc_t.cwiseProduct(s_nodes.cwiseInverse()); // update standard activity
         if (n % ipd.sample == 0) {
-            writeMatrixToFile("Output/conc_"+std::to_string(cnt)+".txt",conc_t);
-            writeMatrixToFile("Output/lambda_"+std::to_string(cnt)+".txt",lambda_t);
+            writeMatrixToFile(ipd.output_folder+"conc_"+std::to_string(cnt)+".txt",conc_t);
+            writeMatrixToFile(ipd.output_folder+"lambda_"+std::to_string(cnt)+".txt",lambda_t);
             cnt++;
         }
 
@@ -104,7 +104,7 @@ void nonsteadystate(InputData ipd, mat s_nodes, mat varpi_hor, mat varpi_ver) {
         }
         volume_change(n) = dV_above_current;
     }
-    writeMatrixToFile("Output/volume_change.txt",volume_change);
-    writeMatrixToFile("Output/mass_out.txt",mass_out);
+    writeMatrixToFile(ipd.output_folder+"volume_change.txt",volume_change);
+    writeMatrixToFile(ipd.output_folder+"mass_out.txt",mass_out);
 
 }
