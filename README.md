@@ -5,7 +5,7 @@
 ###### ...d t = 0
 ...steady state
 
-This is a C++ software for calculating membrane concentration-profiles, fluxes, permeabilities, and so forth in steady-state based on Mesh Analysis. The software is built around a 2D rectangular membrane which is laterally periodic and therefore infinite, suitable for for example brick and mortar systems. The program is fundamentally constructed to model mass diffusion however it can also be used to model temperature flux and change diffusion. The major restriction of the scheme is that it assumes one constant concentration profile at the upper boundary of the system while utilizing a zink, i.e. zero concentration, at the lower boundary. For thermal/electric diffusion the temperature/electric potential is constant at those boundaries.
+This is a C++ software for calculating membrane concentration-profiles, fluxes, permeabilities, and so forth in steady-state based on Mesh Analysis. The software is built around a 2D rectangular membrane which is laterally periodic and therefore infinite, suitable for for example brick and mortar systems. The program is fundamentally constructed to model mass diffusion however it can also be used to model temperature flux and change diffusion. The major restriction of the scheme is that it assumes one constant concentration profile at the upper boundary of the system while utilizing a zink, i.e. zero concentration, at the lower boundary. For thermal/electric diffusion the temperature/electric potential is constant at those boundaries. Included is also the non-steady state software Advacuum which gives concentration-profiles and flows. That software is in many ways compatible with TTIAL, for example much of the input data is similar.
 
 ## Usage
 
@@ -25,25 +25,39 @@ make
 
 ### Example
 
-An example of a Brick and Mortar system can be run by executing the following commands
+#### Steady State
+
+A steady state example of a Brick and Mortar system can be run by executing the following commands
 
 ~~~ bash
-cd example
-../ttial
+cd examples/steadystate
+../../ttial
 ~~~
 
-Alternatively it is possible to use IPython to run the software and produce figures based on the ouput by
+Alternatively it is possible to use the Jupyter Notebook `brick_and_mortar.ipynb` in the same folder.
 
 ~~~ bash
+jupyter-notebook brick_and_mortar.ipynb
+~~~
+
+Finally, in order to use IPython to run the software and produce figures simply convert the ipynb-file and run the produced py-file.
+
+~~~ bash
+jupyter nbconvert --to script brick_and_mortar.ipynb
 ipython brick_and_mortar.py
 ~~~
 
-And finally a Jupyter Notebook is available where it is possble to run the software and produce figures based on the ouput.
+#### Non Steady State
+
+~~~ bash
+cd examples/nonsteadystate
+../../advacuum
+~~~
 
 
 ### Input data
 
-In the following we define the diffusion coefficient as D=U*R*T where U is the mobility, R the gas constant, and T the temperature. The solubility is defined by S = c0 / gamma / exp(mu0/RT) where c0 is the standard concentration, gamma the activity coefficient, and mu0 the standard chemical potential. 
+All input to the software is retrieved from the `input.txt` file which must be in the same folder as where the program is executed from. In the following we define the diffusion coefficient as D=U*R*T where U is the mobility, R the gas constant, and T the temperature. The solubility is defined by S = c0 / gamma / exp(mu0/RT) where c0 is the standard concentration, gamma the activity coefficient, and mu0 the standard chemical potential.
 For charge diffusion `c_out` divited by `S_out` is the electric potential difference over the system and the resistances are the products between the solubilities `S` and diffusion coefficients `D`. 
 For heat diffusion `c_out` divited by `S_out` is the temperature difference over the system and the thermal conductivities are the products between the solubilities `S` and diffusion coefficients `D`.
 
@@ -56,7 +70,7 @@ Input parameter    |   Unit   |   Type   | Description
 `t`		   | m        | double   | brick thickness
 `N`		   | unitless | integer  | nbr of layers of bricks
 `omega`		   | unitless | double   | offset ratio, negative gives random
-`c_out`		   | kg/m^3   | double   | concentration outside system
+`c_out`		   | kg/m^3   | double   | concentration outside system at upper boundary
 `S_out`		   | kg/m^3   | double   | solubility outside system
 `S_mv`		   | kg/m^3   | double   | mortar solubility (verticle)
 `S_mh`		   | kg/m^3   | double   | mortar solubility (horizontal)
@@ -72,8 +86,36 @@ Input parameter    |   Unit   |   Type   | Description
 `load_external`	   | N/A      | bool     | load external mesh, true/false
 `Nc`		   | unitless | integer  | number of columns of nodes
 `Nr`		   | unitless | integer  | number of rows of nodes
+`output_folder`    | N/A      | string   | folder in which output is put, current directory if not given [FIX]
+
+#### Exclusive non-steady state input
+
+Input parameter    |   Unit   |   Type   | Description
+------------------ | -------- | -------- | -------------------
+`time_steps`	   | unitless | integer  | number of iterations in time
+`sample`	   | unitless | integer  | interval for output samples
+`dt`		   | s        | double   | time-step
+`time_periodic`	   | s        | double   | time between applying `c_out` at upper boundary
+`evaporate`	   | N/A      | bool     | evaporate volume at upper boundary, true/false
 
 ### Output data
+
+Output files                |   Unit    | Description
+--------------------------- | --------- | -------------
+`output.txt`                |  -        | Miscellaneous data
+
+Data in `output.txt`        |   Unit    | Description
+--------------------------- | --------- | -------------
+`model`                     |  unitless | Name of used model
+`K_{M_ver/out}`             |  unitless | Partition coefficient between mortar (vertical) and outside
+`K_{B_ver/out}`             |  unitless | Partition coefficient between bricks (vertical) and outside
+`K_{M_ver/B_ver}`           |  unitless | Partition coefficient between mortar and bricks (both vertical)
+`K_{M_hor/B_hor}`           |  unitless | Partition coefficient between mortar and bricks (both horizontal)
+`height`                    |  m        | Height of system
+`width`                     |  m        | Width of system
+`Time`                      |   -       | Time to run the software [Days/Hours/Minutes/Seconds]
+
+#### Exclusive steady state output
 
 Output files                |   Unit    | Description
 --------------------------- | --------- | -------------
@@ -88,20 +130,20 @@ Output files                |   Unit    | Description
 `Dh_matrix.txt`             |  m^2/s    | Diffusion coefficients in the horizontal cells
 `Dv_matrix.txt`             |  m^2/s    | Diffusion coefficients in the vertical cells
 `V_matrix.txt`              |  unitless | Potential in nodes in between cells
-`output.txt`                |  -        | Miscellaneous data
 
 Data in `output.txt`        |   Unit    | Description
 --------------------------- | --------- | -------------
-`model`                     |  unitless | Name of used model
-`K_{M_ver/out}`             |  unitless | Partition coefficient between mortar (vertical) and outside
-`K_{B_ver/out}`             |  unitless | Partition coefficient between bricks (vertical) and outside
-`K_{M_ver/B_ver}`           |  unitless | Partition coefficient between mortar and bricks (both vertical) 
-`K_{M_hor/B_hor}`           |  unitless | Partition coefficient between mortar and bricks (both horizontal) 
-`height`                    |  m        | Height of system
-`width`                     |  m        | Width of system
 `I_bot_sum`                 |  kg/m^2 s | Flux out of the system
 `I_top_sum`                 |  kg/m^2 s | Flux into the system
 `Reff`                      |  s m / kg | Effective resistance of the whole system
 `j_ver`                     |  kg/m^2 s | Mean value of data in `jv_vector.txt`
 `j_hor`                     |  kg/m^2 s | Mean value of data in `jh_vector.txt`
-`Time`                      |   -       | Time to run the software [Days/Hours/Minutes/Seconds]
+
+#### Exclusive non-steady state output
+
+Output files                |   Unit    | Description
+--------------------------- | --------- | -------------
+`sn_matrix.txt`             |  kg/m^3   | Solubility in the nodes [FIX no such for steay-state]
+`conc_X.txt`                |  kg/m^3   | Concentration profile, sample `X`
+`volume_change.txt`         |  m^3      | volume of elements outside of upper boundary, vector in time
+`mass_out.txt`              |  kg       | mass flowing out of the lower boundary, vector in time
