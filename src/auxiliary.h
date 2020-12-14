@@ -23,7 +23,7 @@ void removeColumn(mat &inm, unsigned int index) {
     inm.conservativeResize(rows,cols);
 }
 
-void insertRow(mat &inm, unsigned int index) {
+void insertRow(mat &inm, unsigned int index, double value=1.0) {
     unsigned int rows = inm.rows();
     inm.conservativeResize(rows+1, inm.cols());
     mat tmp = inm.bottomRows(rows-index);
@@ -31,17 +31,17 @@ void insertRow(mat &inm, unsigned int index) {
     //inm.row(index) *= 0.0;
 
     inm.row(index) = vec::Ones(inm.row(index).cols());
-    inm.row(index) *= 1.0;
+    inm.row(index) *= value;
 }
 
-void insertColumn(mat &inm, unsigned int index) {
+void insertColumn(mat &inm, unsigned int index, double value=1.0) {
     unsigned int cols = inm.cols();
     inm.conservativeResize(inm.rows(), cols+1);
     mat tmp = inm.rightCols(cols-index);
     inm.rightCols(cols-index -1) = tmp.leftCols(tmp.cols()-1);
 
     inm.col(index) = vec::Ones(inm.col(index).rows());
-    inm.col(index) *= 1.0;
+    inm.col(index) *= value;
 }
 
 void expandMatrix(mat &inm, std::vector<bool> empty_vec) {

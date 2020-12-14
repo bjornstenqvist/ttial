@@ -31,3 +31,4 @@ include_directories(SYSTEM ${eigen_SOURCE_DIR})
 include_directories(${CMAKE_SOURCE_DIR})
 
 add_executable(ttial ttial.cpp)
+add_executable(advacuum advacuum.cpp)

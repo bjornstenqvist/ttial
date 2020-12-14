@@ -7,13 +7,18 @@
  */
 class Geometry
 {
-  public:
-    void fillGeometryWithTunnels(mat &A_mat, mat &B_mat, double A_sca, double B_sca, int x_start);
-    void fillGeometryWithCircles(mat &A_mat, mat &B_mat, double A_sca, double B_sca, std::vector<double> xv, std::vector<double> yv, std::vector<double> rcv, double dx, double dy, double L, double offset);
-    void fillGeometryWithRectangles(mat &A_mat, mat &B_mat, double A_sca, double B_sca, std::vector<double> xv, std::vector<double> yv, double d, double t, double dx, double dy, double L, double offset);
-    void brickAndMortar(mat &s_hor, mat &s_ver, mat &D_hor, mat &D_ver, double &height, double &width, InputData ipd, std::string &name);
-    void brickAndMortarDualLinear(mat &s_hor, mat &s_ver, mat &D_hor, mat &D_ver, double &height, double &width, InputData ipd, std::string &name);
-    void getGeometry(mat &s_hor, mat &s_ver, mat &D_hor, mat &D_ver, double &height, double &width, InputData ipd, std::string output_file);
+    public:
+        void fillGeometryWithTunnels(mat &A_mat, mat &B_mat, double A_sca, double B_sca, int x_start);
+        void fillGeometryWithCircles(mat &A_mat, mat &B_mat, double A_sca, double B_sca, std::vector<double> xv, std::vector<double> yv, std::vector<double> rcv, double dx, double dy, double L, double offset);
+        void fillGeometryWithRectangles(mat &A_mat, mat &B_mat, double A_sca, double B_sca, std::vector<double> xv, std::vector<double> yv, double d, double t, double dx, double dy, double L, double offset);
+        void fillGeometryWithRectanglesNodes(mat &A_mat, double A_sca, std::vector<double> xv, std::vector<double> yv, double d, double t, double width, double height);
+        void fillGeometryWithRectanglesHor(mat &A_mat, mat &B_mat, double A_sca, double B_sca, std::vector<double> xv, std::vector<double> yv, double d, double t, double width, double height);
+        void fillGeometryWithRectanglesVer(mat &A_mat, mat &B_mat, double A_sca, double B_sca, std::vector<double> xv, std::vector<double> yv, double d, double t, double width, double height);
+        void brickAndMortar(mat &s_hor, mat &s_ver, mat &s_nodes, mat &D_hor, mat &D_ver, double &height, double &width, InputData ipd, std::string &name);
+        void brickAndMortarDualLinear(mat &s_hor, mat &s_ver, mat &s_nodes, mat &D_hor, mat &D_ver, double &height, double &width, InputData ipd, std::string &name);
+        void getGeometry(mat &s_hor, mat &s_ver, mat &s_nodes, mat &D_hor, mat &D_ver, InputData &ipd, std::string output_file);
+        void checkInputForBrickAndMortar(InputData ipd);
+        void getBricks(InputData ipd, std::vector<double> &xv, std::vector<double> &yv);
 };
 
 /**
@@ -112,14 +117,14 @@ void Geometry::fillGeometryWithRectangles(mat &A_mat, mat &B_mat, double A_sca, 
     assert(xv.size() == yv.size());
     for(unsigned int r = 0; r < A_mat.rows(); r++)
         for(unsigned int c = 0; c < A_mat.cols(); c++) {
-            double x = ( double(c) + 0.5 ) * dx; // center of resistance
-            double y = ( double(2*r) + 0.5 + offset ) * dy; // the 'two' counts one vertical layer and one horizontal layer
+            double x = ( double(c) + 0.5*offset ) * dx; // center of resistance
+            double y = ( double(2*r) + 0.5 + 0.5*offset ) * dy; // the 'two' counts one vertical layer and one horizontal layer
 
             for(unsigned int i = 0; i < xv.size(); i++) {
-                double xn = std::fabs(PBC_1D(x-xv.at(i),L));
-                double yn = std::fabs(y - yv.at(i));
+                double xn = (PBC_1D(x-xv.at(i),L));
+                double yn = (y - yv.at(i));
 
-                if(xn < d/2.0 && yn < t/2.0) {
+                if(xn >= -d/2.0 && xn < d/2.0 && yn >= -t/2.0 && yn < t/2.0) {
                     A_mat(r,c) = A_sca;
                     B_mat(r,c) = B_sca;
                     break;
@@ -128,19 +133,72 @@ void Geometry::fillGeometryWithRectangles(mat &A_mat, mat &B_mat, double A_sca, 
         }
 }
 
-/**
- * @brief Get solubility and diffusion coefficient matrices for a brick and mortar system
- * @param s_hor Matrix of horizontal solubilities (will be set)
- * @param s_ver Matrix of vertical solubilities (will be set)
- * @param D_hor Matrix of horizontal diffusion coefficients (will be set)
- * @param D_ver Matrix of vertical diffusion coefficients (will be set)
- * @param height Height of system (will be set)
- * @param width Width of system (will be set)
- * @param ipd Input data for the system
- * @param name Name of system (will be set)
- * @note All input except 'ipd' is set using this function. All input data is supplied in 'ipd'.
- */
-void Geometry::brickAndMortar(mat &s_hor, mat &s_ver, mat &D_hor, mat &D_ver, double &height, double &width, InputData ipd, std::string &name) {
+void Geometry::fillGeometryWithRectanglesNodes(mat &A_mat, double A_sca, std::vector<double> xv, std::vector<double> yv, double d, double t, double width, double height) {
+    assert(xv.size() == yv.size());
+    double dx = width/double(A_mat.cols());
+    double dy = height/double(A_mat.rows()+1);
+    for(unsigned int r = 0; r < A_mat.rows(); r++)
+        for(unsigned int c = 0; c < A_mat.cols(); c++) {
+            double x = double(c) * dx + dx*1e-9; // center of resistance
+            double y = ( double(r) + 1.0 ) * dy + dy*1e-9; // the 'two' counts one vertical layer and one horizontal layer
+
+            for(unsigned int i = 0; i < xv.size(); i++) {
+                double xn = (PBC_1D(x-xv.at(i),width));
+                double yn = (y - yv.at(i));
+
+                if(xn >= -d/2.0 && xn < d/2.0 && yn >= -t/2.0 && yn < t/2.0) {
+                    A_mat(r,c) = A_sca;
+                    break;
+                }
+            }
+        }
+}
+
+void Geometry::fillGeometryWithRectanglesHor(mat &A_mat, mat &B_mat, double A_sca, double B_sca, std::vector<double> xv, std::vector<double> yv, double d, double t, double width, double height) {
+    assert(xv.size() == yv.size());
+    double dx = width/double(A_mat.cols());
+    double dy = height/double(A_mat.rows()+1);
+    for(unsigned int r = 0; r < A_mat.rows(); r++)
+        for(unsigned int c = 0; c < A_mat.cols(); c++) {
+            double x = ( double(c) + 0.5 ) * dx + dx*1e-9; // center of resistance
+            double y = ( double(r) + 1.0 ) * dy + dy*1e-9; // the 'two' counts one vertical layer and one horizontal layer
+
+            for(unsigned int i = 0; i < xv.size(); i++) {
+                double xn = (PBC_1D(x-xv.at(i),width));
+                double yn = (y - yv.at(i));
+
+                if(xn >= -d/2.0 && xn < d/2.0 && yn >= -t/2.0 && yn < t/2.0) {
+                    A_mat(r,c) = A_sca;
+                    B_mat(r,c) = B_sca;
+                    break;
+                }
+            }
+        }
+}
+
+void Geometry::fillGeometryWithRectanglesVer(mat &A_mat, mat &B_mat, double A_sca, double B_sca, std::vector<double> xv, std::vector<double> yv, double d, double t, double width, double height) {
+    assert(xv.size() == yv.size());
+    double dx = width/double(A_mat.cols());
+    double dy = height/double(A_mat.rows());
+    for(unsigned int r = 0; r < A_mat.rows(); r++)
+        for(unsigned int c = 0; c < A_mat.cols(); c++) {
+            double x = double(c) * dx + dx*1e-9; // center of resistance
+            double y = ( double(r) + 0.5 ) * dy + dy*1e-9; // the 'two' counts one vertical layer and one horizontal layer
+
+            for(unsigned int i = 0; i < xv.size(); i++) {
+                double xn = (PBC_1D(x-xv.at(i),width));
+                double yn = (y - yv.at(i));
+
+                if(xn >= -d/2.0 && xn < d/2.0 && yn >= -t/2.0 && yn < t/2.0) {
+                    A_mat(r,c) = A_sca;
+                    B_mat(r,c) = B_sca;
+                    break;
+                }
+            }
+        }
+}
+
+void Geometry::checkInputForBrickAndMortar(InputData ipd) {
     assert(("brick thickness cannot be negatve" && ipd.t >= 0));
     assert(("brick width cannot be negatve" && ipd.d >= 0));
     assert(("vertical spacing between bricks cannot be negatve" && ipd.g >= 0));
@@ -156,28 +214,15 @@ void Geometry::brickAndMortar(mat &s_hor, mat &s_ver, mat &D_hor, mat &D_ver, do
     assert(("horizontal mobility in bricks cannot be negative" && ipd.D_bh >= 0));
     assert(("number of columns in mesh needs to be positive" && ipd.C > 0));
     assert(("number of rows in mesh cannot be negative" && ipd.R >= 0));
+}
 
-    name = "Brick and Mortar";
-    width = ipd.d + ipd.s;
-    height = double( ipd.N )*ipd.t + double( ipd.N-1 )*ipd.g;
-    double res_width = width / double( ipd.C );
-    double res_hight = height / double( 2*ipd.R + 1 );
-
-    // fill geometry with mortar ("background")
-    s_ver = mat::Ones(ipd.R+1,ipd.C)*ipd.S_mv;
-    s_hor = mat::Ones(ipd.R,ipd.C)*ipd.S_mh;
-    D_ver = mat::Ones(ipd.R+1,ipd.C)*ipd.D_mv;
-    D_hor = mat::Ones(ipd.R,ipd.C)*ipd.D_mh;
-
-    // calculate brick centers
-    std::vector<double> xv(0);
-    std::vector<double> yv(0);
-    std::vector<double> rcv(0);
+void Geometry::getBricks(InputData ipd, std::vector<double> &xv, std::vector<double> &yv) {
+    xv.resize(0);
+    yv.resize(0);
+    double width = ipd.d + ipd.s;
     for(int n = 0; n < ipd.N; n += 2) {
         yv.push_back(ipd.t/2.0 + n*(ipd.t+ipd.g));
         yv.push_back(ipd.t/2.0 + (n+1)*(ipd.t+ipd.g));
-        rcv.push_back(ipd.t/2.0);
-        rcv.push_back(ipd.t/2.0);
 
         if(ipd.omega < 0.0) {
             xv.push_back(randomUnit(0.0,1.0)*width);
@@ -187,18 +232,44 @@ void Geometry::brickAndMortar(mat &s_hor, mat &s_ver, mat &D_hor, mat &D_ver, do
             xv.push_back(ipd.d/2.0 + ipd.omega*(ipd.d+ipd.s)/(1.0+ipd.omega));
         }
     }
+}
 
-    double y = ipd.g/2.0;
-    std::vector<double> xlv(0);
-    std::vector<double> ylv(0);
-    while(y < height) {
-        xlv.push_back(0.0);
-        ylv.push_back(y);
-        y += ipd.g;
-    }
+/**
+ * @brief Get solubility and diffusion coefficient matrices for a brick and mortar system
+ * @param s_hor Matrix of horizontal solubilities (will be set)
+ * @param s_ver Matrix of vertical solubilities (will be set)
+ * @param D_hor Matrix of horizontal diffusion coefficients (will be set)
+ * @param D_ver Matrix of vertical diffusion coefficients (will be set)
+ * @param height Height of system (will be set)
+ * @param width Width of system (will be set)
+ * @param ipd Input data for the system
+ * @param name Name of system (will be set)
+ * @note All input except 'ipd' is set using this function. All input data is supplied in 'ipd'.
+ */
+void Geometry::brickAndMortar(mat &s_hor, mat &s_ver, mat &s_nodes, mat &D_hor, mat &D_ver, double &height, double &width, InputData ipd, std::string &name) {
+    Geometry::checkInputForBrickAndMortar(ipd);
 
-    fillGeometryWithRectangles(s_ver,D_ver,ipd.S_bv,ipd.D_bv,xv,yv,ipd.d,ipd.t,res_width,res_hight,width,0.0);
-    fillGeometryWithRectangles(s_hor,D_hor,ipd.S_bh,ipd.D_bh,xv,yv,ipd.d,ipd.t,res_width,res_hight,width,1.0);
+    name = "Brick and Mortar";
+    width = ipd.d + ipd.s;
+    height = double( ipd.N )*ipd.t + double( ipd.N-1 )*ipd.g;
+
+    // fill geometry with mortar ("background")
+    s_ver = mat::Ones(ipd.R+1,ipd.C)*ipd.S_mv;
+    s_hor = mat::Ones(ipd.R,ipd.C)*ipd.S_mh;
+    s_nodes = mat::Ones(ipd.R,ipd.C)*ipd.S_mh;
+    D_ver = mat::Ones(ipd.R+1,ipd.C)*ipd.D_mv;
+    D_hor = mat::Ones(ipd.R,ipd.C)*ipd.D_mh;
+
+    // calculate brick centers
+    std::vector<double> xv, yv;
+    Geometry::getBricks(ipd,xv,yv);
+
+    fillGeometryWithRectanglesVer(s_ver,D_ver,ipd.S_bv,ipd.D_bv,xv,yv,ipd.d,ipd.t,width,height);
+    fillGeometryWithRectanglesHor(s_hor,D_hor,ipd.S_bh,ipd.D_bh,xv,yv,ipd.d,ipd.t,width,height);
+    fillGeometryWithRectanglesNodes(s_nodes,ipd.S_bh,xv,yv,ipd.d,ipd.t,width,height);
+    insertRow(s_nodes,0,ipd.S_out);
+    s_nodes.conservativeResize(s_nodes.rows()+1, s_nodes.cols());
+    s_nodes.row(s_nodes.rows()-1) = ipd.S_out*vec::Ones(s_nodes.row(s_nodes.rows()-1).cols());
 }
 
 /**
@@ -212,12 +283,12 @@ void Geometry::brickAndMortar(mat &s_hor, mat &s_ver, mat &D_hor, mat &D_ver, do
  * @param ipd Input data for the system
  * @param name Name of system (will be set)
  * @note All input except 'ipd' is set using this function. All input data is supplied in 'ipd'. The solubility 'S' is described as a function of the depth 'z' as
-     * @f[
-     *     S(z) = \left[S_{mt} + \left(\frac{S_{m} - S_{mt}}{z_{break}} \right)\cdot z\right]\theta(z_{break}-z) + S_m\cdot\theta(z-z_{break})
-     * @f]
-     * where @f$ \theta(z) @f$ is the Heaviside step function.
+ * @f[
+ *     S(z) = \left[S_{mt} + \left(\frac{S_{m} - S_{mt}}{z_{break}} \right)\cdot z\right]\theta(z_{break}-z) + S_m\cdot\theta(z-z_{break})
+ * @f]
+ * where @f$ \theta(z) @f$ is the Heaviside step function.
  */
-void Geometry::brickAndMortarDualLinear(mat &s_hor, mat &s_ver, mat &D_hor, mat &D_ver, double &height, double &width, InputData ipd, std::string &name) {
+void Geometry::brickAndMortarDualLinear(mat &s_hor, mat &s_ver, mat &s_nodes, mat &D_hor, mat &D_ver, double &height, double &width, InputData ipd, std::string &name) {
     assert(("brick thickness cannot be negatve" && ipd.t >= 0));
     assert(("brick width cannot be negatve" && ipd.d >= 0));
     assert(("vertical spacing between bricks cannot be negatve" && ipd.g >= 0));
@@ -250,6 +321,7 @@ void Geometry::brickAndMortarDualLinear(mat &s_hor, mat &s_ver, mat &D_hor, mat 
     // fill geometry with mortar ("background")
     s_hor = mat::Ones(ipd.R,ipd.C)*ipd.S_mh;
     s_ver = mat::Ones(ipd.R+1,ipd.C)*ipd.S_mv;
+    s_nodes = mat::Ones(ipd.R,ipd.C)*ipd.S_mh;
     D_hor = mat::Ones(ipd.R,ipd.C)*ipd.D_mh;
     D_ver = mat::Ones(ipd.R+1,ipd.C)*ipd.D_mv;
 
@@ -265,8 +337,10 @@ void Geometry::brickAndMortarDualLinear(mat &s_hor, mat &s_ver, mat &D_hor, mat 
     m = ipd.S_mth;
     for(int r = 0; r < s_hor.rows(); r++) {
         double y = ( double(2*r) + 0.5 ) * res_hight; // the 'two' counts one vertical layer and one horizontal layer
-        if( y < ipd.z_break)
+        if( y < ipd.z_break) {
             s_hor.row(r) = vec::Ones(s_hor.cols())*( k*y + m );
+            s_nodes.row(r) = vec::Ones(s_nodes.cols())*( k*y + m );
+        }
     }
 
     k = (ipd.D_mtv - ipd.D_mv)/(0.0 - ipd.z_break);
@@ -304,6 +378,10 @@ void Geometry::brickAndMortarDualLinear(mat &s_hor, mat &s_ver, mat &D_hor, mat 
     // fill geometry with bricks ("foreground")
     fillGeometryWithRectangles(s_ver,D_ver,ipd.S_bv,ipd.D_bv,xv,yv,ipd.d,ipd.t,res_width,res_hight,width,0.0);
     fillGeometryWithRectangles(s_hor,D_hor,ipd.S_bh,ipd.D_bh,xv,yv,ipd.d,ipd.t,res_width,res_hight,width,1.0);
+    fillGeometryWithRectanglesNodes(s_nodes,ipd.S_bh,xv,yv,ipd.d,ipd.t,ipd.width,ipd.height);
+    insertRow(s_nodes,0,ipd.S_out);
+    s_nodes.conservativeResize(s_nodes.rows()+1, s_nodes.cols());
+    s_nodes.row(s_nodes.rows()-1) = ipd.S_out*vec::Ones(s_nodes.row(s_nodes.rows()-1).cols());
 }
 
 /**
@@ -312,16 +390,16 @@ void Geometry::brickAndMortarDualLinear(mat &s_hor, mat &s_ver, mat &D_hor, mat 
  * @param s_ver Matrix of vertical solubilities (will be set)
  * @param D_hor Matrix of horizontal diffusion coefficients (will be set)
  * @param D_ver Matrix of vertical diffusion coefficients (will be set)
- * @param height Height of system (will be set)
- * @param width Width of system (will be set)
  * @param ipd Input data for the system
  * @param output_file Name of output-file
  * @note All input except 'ipd' and 'output_file' is set using this function. All input data is supplied in 'ipd'.
+ * @todo Check 's_nodes' size for load_external.
  */
-void Geometry::getGeometry(mat &s_hor, mat &s_ver, mat &D_hor, mat &D_ver, double &height, double &width, InputData ipd, std::string output_file) {
+void Geometry::getGeometry(mat &s_hor, mat &s_ver, mat &s_nodes, mat &D_hor, mat &D_ver, InputData &ipd, std::string output_file) {
     if(ipd.load_external) {
         s_ver = loadMatrix("sv_matrix.txt");
         s_hor = loadMatrix("sh_matrix.txt");
+        s_nodes = loadMatrix("sn_matrix.txt");
         D_ver = loadMatrix("Dv_matrix.txt");
         D_hor = loadMatrix("Dh_matrix.txt");
         assert(("externally loaded matrices do not have compatible sizes" && compatibleSizes(s_ver,s_hor,D_ver,D_hor)));
@@ -331,9 +409,9 @@ void Geometry::getGeometry(mat &s_hor, mat &s_ver, mat &D_hor, mat &D_ver, doubl
     } else {
         std::string name = "";
         if(ipd.model_nbr == 1) {
-            brickAndMortarDualLinear(s_hor,s_ver,D_hor,D_ver,height,width,ipd,name);
+            brickAndMortarDualLinear(s_hor,s_ver,s_nodes,D_hor,D_ver,ipd.height,ipd.width,ipd,name);
         } else if(ipd.model_nbr == 0) {
-            brickAndMortar(s_hor,s_ver,D_hor,D_ver,height,width,ipd,name);
+            brickAndMortar(s_hor,s_ver,s_nodes,D_hor,D_ver,ipd.height,ipd.width,ipd,name);
         } else {
             std::cerr << "model not found\n";
             exit(EXIT_FAILURE);
@@ -345,9 +423,10 @@ void Geometry::getGeometry(mat &s_hor, mat &s_ver, mat &D_hor, mat &D_ver, doubl
         appendDataToFile(output_file,"K_{M_hor/B_hor} "+to_string_precision(ipd.S_mh/ipd.S_bh) +"\n");
         writeMatrixToFile("sh_matrix.txt",s_hor);
         writeMatrixToFile("sv_matrix.txt",s_ver);
+        writeMatrixToFile("sn_matrix.txt",s_nodes);
         writeMatrixToFile("Dh_matrix.txt",D_hor);
         writeMatrixToFile("Dv_matrix.txt",D_ver);
     }
-    appendDataToFile(output_file,"height "+to_string_precision(height) +"\n");
-    appendDataToFile(output_file,"width "+to_string_precision(width) +"\n");
+    appendDataToFile(output_file,"height "+to_string_precision(ipd.height) +"\n");
+    appendDataToFile(output_file,"width "+to_string_precision(ipd.width) +"\n");
 }
