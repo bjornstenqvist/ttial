@@ -14,7 +14,7 @@ class InputData {
 
     public:
         int R, C, N, seed, model_nbr;
-        double d, s, g, t, omega, S_mv, S_mh, S_bv, S_bh, S_mtv, S_mth, D_mtv, D_mth, D_mv, D_mh, D_bv, D_bh, DLambda, z_break, height, width, c_out, S_out; // DLambda superfluous?
+        double d, s, g, t, omega, S_mv, S_mh, S_bv, S_bh, S_mtv, S_mth, D_mtv, D_mth, D_mv, D_mh, D_bv, D_bh, DLambda, z_break, height, width, c_out, S_out, evap_time, evap_left; // DLambda superfluous?
         bool load_external;
         std::string input_folder, output_folder, output_file;
         const double inf = std::numeric_limits<double>::infinity();
@@ -58,6 +58,8 @@ class InputData {
             z_break = -0.1;
             height = -0.1;
             width = -0.1;
+	    evap_time = -0.1;
+	    evap_left = -0.1;
 
             S_out = -0.1;
             c_out = -0.1;
@@ -160,11 +162,20 @@ class InputData {
                     if (result.at(0).compare("evaporate") == 0)
                         if(!result.at(1).compare("true"))
                             evaporate = true;
+                    if (result.at(0).compare("evap_time") == 0)
+                        evap_time = std::stod(result.at(1));
+                    if (result.at(0).compare("evap_left") == 0)
+                        evap_left = std::stod(result.at(1));
                 }
                 myfile.close();
             }
             else {
                 std::cerr << "Unable to open input-file\n";
+                exit(EXIT_FAILURE);
+            }
+
+            if(evaporate && ( evap_time < 0.0 || evap_left < 0.0 ) ) {
+                std::cerr << "Could not load 'evap_time' or 'evap_left'\n";
                 exit(EXIT_FAILURE);
             }
 

@@ -31,4 +31,6 @@ sample        100    # sample interval (non-steady state)
 dt            1      # dt                (non-steady state)
 time_periodic -0.1   # time periodic     (non-steady state)
 evaporate     true   # evaporate         (non-steady state)
+evap_time     10   # time after which 'evap_left' fraction of volume at upper boundary is left, only relevant if 'evaporate' is true
+evap_left     10   # fraction of volume at upper boundary after which 'evap_left' is left, only relevant if 'evaporate' is true
 
