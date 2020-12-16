@@ -308,7 +308,7 @@ std::string getTimeString(double timed) {
     int minutes = int(timed/60.0);
     timed -= double(minutes)*60.0;
     int seconds = int(timed);
-    std::string str = "Time "+std::to_string(days)+"D"+std::to_string(hours)+"H"+std::to_string(minutes)+"M"+std::to_string(seconds)+"S\n";
+    std::string str = "Time "+std::to_string(days)+"D_"+std::to_string(hours)+"H_"+std::to_string(minutes)+"M_"+std::to_string(seconds)+"S\n";
     return str;
 }
 
