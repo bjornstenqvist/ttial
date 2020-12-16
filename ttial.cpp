@@ -27,9 +27,7 @@ int main(int argc, const char **argv) {
     varpi_hor = s_hor.cwiseProduct(D_hor); // set horizontal momentum permittivity
     varpi_ver = s_ver.cwiseProduct(D_ver); // set vertical momentum permittivity
 
-    mat res_hor = varpi_hor.cwiseInverse(); // set horizontal resistance
-    mat res_ver = varpi_ver.cwiseInverse(); // set vertical resistance
-    steadystate(ipd,res_hor,res_ver,varpi_hor,varpi_ver,s_hor,s_ver);
+    steadystate(ipd,varpi_hor,varpi_ver,s_hor,s_ver);
 
     std::chrono::steady_clock::time_point now = std::chrono::steady_clock::now(); // stop timer
     double timed = double(std::chrono::duration_cast<std::chrono::milliseconds>(now - start_time).count())/1000.0; // calculate elapsed time

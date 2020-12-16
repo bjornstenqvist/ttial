@@ -57,11 +57,14 @@ void calcNodeAbsActivities(mat &res_hor, mat &res_ver, double DeltaV, double dy,
     appendDataToFile(output_file,"Reff "+to_string_precision(Reff)+"\n"); // generate output to file
 }
 
-void steadystate(InputData ipd, mat res_hor, mat res_ver, mat varpi_hor, mat varpi_ver, mat s_hor, mat s_ver) {
+void steadystate(InputData ipd, mat varpi_hor, mat varpi_ver, mat s_hor, mat s_ver) {
+    mat res_hor = varpi_hor.cwiseInverse(); // set horizontal resistance
+    mat res_ver = varpi_ver.cwiseInverse(); // set vertical resistance
+
     double dy = ipd.height/double(ipd.R);
     calcNodeAbsActivities(res_hor,res_ver,ipd.DLambda,dy,ipd.output_folder,ipd.output_file); // perform main calculations, i.e. get potential in nodes
 
     // generate output and end program
     mat Lambda_mat = loadMatrix(ipd.output_folder+"V_matrix.txt"); // load output from 'calcNodeAbsActivities' which is written to file
-    calcProp(varpi_hor,varpi_ver,s_hor,s_ver,Lambda_mat,ipd.height,ipd.width,ipd.output_folder,ipd.output_file); // calculate concentrations and fluxes
+    calcProp(varpi_hor,varpi_ver,s_hor,s_ver,Lambda_mat,ipd.height,ipd.width,ipd.c_out,ipd.output_folder,ipd.output_file); // calculate concentrations and fluxes
 }

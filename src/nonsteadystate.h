@@ -61,7 +61,7 @@ double evaporateVolume(double v_0, double vt1, double t, double t1, int k=1) {
   return ( A/std::pow(t+1.0,double(k)) + B );
 }
 
-void nonsteadystate(InputData ipd, mat s_nodes, mat varpi_hor, mat varpi_ver) {
+void nonsteadystate(InputData ipd, mat varpi_hor, mat varpi_ver, mat s_nodes) {
     int R = s_nodes.rows();
     mat conc_t = 0.0*s_nodes;
     conc_t.row(0).setConstant(ipd.c_out);
