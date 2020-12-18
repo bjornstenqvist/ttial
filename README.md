@@ -162,5 +162,8 @@ Output files                |   Unit    | Description
 --------------------------- | --------- | -------------
 `sn_matrix.txt`             |  kg/m^3   | Solubility in the nodes [FIX no such for steay-state]
 `conc_X.txt`                |  kg/m^3   | Concentration profile, sample `X`
+`lambda_X.txt`              |  unitless | Absolute activity profile, sample `X`
+`j_ver_X.txt`               |  kg/m^2 s | Vertical flux matrix, sample `X`
+`j_hor_X.txt`               |  kg/m^2 s | Horizontal flux matrix, sample `X`
 `volume_change.txt`         |  m^3      | Volume of elements outside of upper boundary, vector in time
 `mass_out.txt`              |  kg       | Mass flowing out of the lower boundary, vector in time
