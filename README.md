@@ -61,6 +61,8 @@ All input to the software is retrieved from the `input.txt` file which must be i
 For charge diffusion `c_out` divited by `S_out` is the electric potential difference over the system and the resistances are the products between the solubilities `S` and diffusion coefficients `D`. 
 For heat diffusion `c_out` divited by `S_out` is the temperature difference over the system and the thermal conductivities are the products between the solubilities `S` and diffusion coefficients `D`.
 
+Important! Note that the input-file must end at the last input-row. If empty rows are present at the end of the file the program will crash.
+
 Input parameter    |   Unit   |   Type   | Description
 ------------------ | -------- | -------- | -------------------
 `model_nbr`	   | unitless | integer  | model number, 0 gives Brick and Mortar
