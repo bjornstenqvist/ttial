@@ -15,7 +15,6 @@ void getFlux(mat &lambda, mat &mesh_hor, mat &mesh_ver, double dx, double dy, do
     assert(lambda.cols() == C);
     assert(mesh_hor.cols() == C);
     assert(mesh_ver.cols() == C);
-    //mat delta_conc = mat::Zero(R,C);
 
     for(int c = 0; c < C; c++)
         j_ver_down(0,c) -= ( lambda(0,c) - lambda(1,c) ) / dy * mesh_ver(0,c);
@@ -42,14 +41,10 @@ void getFlux(mat &lambda, mat &mesh_hor, mat &mesh_ver, double dx, double dy, do
     for(int c = 0; c < C; c++)
         j_ver_up(R-1,c) += ( lambda(R-1,c) - lambda(R-2,c) ) / dy * mesh_ver(R-2,c);
 
-    //delta_conc *= dt;
     j_ver_up *= dt;
     j_ver_down *= dt;
     j_hor_left *= dt;
     j_hor_right *= dt;
-
-    // node 'r' surrounded by mesh_ver 'r-1' and mesh_ver 'r'
-    //return delta_conc;
 }
 
 // Give warning if negative
@@ -95,7 +90,6 @@ void nonsteadystate(InputData ipd, mat varpi_hor, mat varpi_ver, mat s_nodes) {
         mat j_hor_right = mat::Zero(lambda_t.rows(),lambda_t.cols());
 
         getFlux(lambda_t,varpi_hor,varpi_ver,dx,dy,ipd.dt,j_ver_up,j_ver_down,j_hor_left,j_hor_right);
-        //conc_t += delta_conc;
         conc_t -= ( j_ver_up - j_ver_down ) / dy;
         conc_t -= ( j_hor_right - j_hor_left ) / dx;
         correctNegative(conc_t);
@@ -130,7 +124,7 @@ void nonsteadystate(InputData ipd, mat varpi_hor, mat varpi_ver, mat s_nodes) {
         }
         volume_change(n) = dV_above_current;
         ++pb;
-        if( n % 100 )
+        if( ( n + 1 ) % ipd.sample == 0 )
             pb.display();
     }
     pb.end_of_process();
