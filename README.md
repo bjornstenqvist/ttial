@@ -85,7 +85,7 @@ Input parameter    |   Unit   |   Type   | Description
 `Nr`		   | unitless | integer  | number of rows of nodes
 `height`	   | m        | double   | height of system, only relevant when loading an external mesh
 `width`		   | m        | double   | width of system, only relevant when loading an external mesh
-`load_external`	   | N/A      | bool     | load external mesh, true/false
+`load_external`	   | N/A      | bool     | load external mesh, default: false
 `input_folder`     | N/A      | string   | folder from which input is loaded, default: current directory, only relevant when loading an external mesh 
 `output_folder`    | N/A      | string   | folder in which output is put, default:  current directory
 `output_file`      | N/A      | string   | name of output-file, default: output.txt
@@ -98,7 +98,8 @@ Input parameter    |   Unit   |   Type   | Description
 `sample`	   | unitless | integer  | interval for output samples
 `dt`		   | s        | double   | time-step
 `time_periodic`	   | s        | double   | time between applying `c_out` at upper boundary
-`evaporate`	   | N/A      | bool     | evaporate volume at upper boundary, true/false
+`evaporate`	   | N/A      | bool     | evaporate volume at upper boundary, default: false
+`display`	   | N/A      | bool     | display progressbar or not, default: true
 
 ### Output data
 

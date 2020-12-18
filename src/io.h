@@ -22,7 +22,7 @@ class InputData {
         int time_steps, sample;
         double time_periodic;
         double dt;
-        bool evaporate;
+        bool evaporate, display;
 
         /**
          * @brief Load input data from file
@@ -58,17 +58,17 @@ class InputData {
             z_break = -0.1;
             height = -0.1;
             width = -0.1;
-	    evap_time = -0.1;
-	    evap_left = -0.1;
+            evap_time = -0.1;
+            evap_left = -0.1;
 
             S_out = -0.1;
             c_out = -0.1;
 
             load_external = false;
 
-	    input_folder = "";
-	    output_folder = "";
-	    output_file = "output.txt";
+            input_folder = "";
+            output_folder = "";
+            output_file = "output.txt";
 
             time_steps = -1;
             sample = -1;
@@ -77,6 +77,7 @@ class InputData {
             dt = -0.1;
 
             evaporate = false;
+            display = true;
 
             if (myfile.is_open())
             {
@@ -162,6 +163,9 @@ class InputData {
                     if (result.at(0).compare("evaporate") == 0)
                         if(!result.at(1).compare("true"))
                             evaporate = true;
+                    if (result.at(0).compare("display") == 0)
+                        if(!result.at(1).compare("false"))
+                            display = false;
                     if (result.at(0).compare("evap_time") == 0)
                         evap_time = std::stod(result.at(1));
                     if (result.at(0).compare("evap_left") == 0)

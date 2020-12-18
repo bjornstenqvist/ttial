@@ -1,6 +1,7 @@
 #pragma once
 #include "auxiliary.h"
 #include "nodes.h"
+#include "visual.h"
 
 /**
  * @brief Solves dc/dt = nabla dot j
@@ -56,9 +57,9 @@ void correctNegative(mat &a) {
 }
 
 double evaporateVolume(double v_0, double vt1, double t, double t1, int k=1) {
-  double A = std::pow(t1+1.0,double(k)) * (v_0 - vt1) / ( std::pow(t1+1.0,double(k)) - 1.0  );
-  double B = v_0 - A;
-  return ( A/std::pow(t+1.0,double(k)) + B );
+    double A = std::pow(t1+1.0,double(k)) * (v_0 - vt1) / ( std::pow(t1+1.0,double(k)) - 1.0  );
+    double B = v_0 - A;
+    return ( A/std::pow(t+1.0,double(k)) + B );
 }
 
 void nonsteadystate(InputData ipd, mat varpi_hor, mat varpi_ver, mat s_nodes) {
@@ -80,11 +81,13 @@ void nonsteadystate(InputData ipd, mat varpi_hor, mat varpi_ver, mat s_nodes) {
     double dV_above_current = dV_above_init;
     writeMatrixToFile(ipd.output_folder+"conc_0.txt",conc_t);
     writeMatrixToFile(ipd.output_folder+"lambda_0.txt",lambda_t);
+
+    ProgressBar pb(ipd.time_steps,ipd.display,70); // 70 is with of output
     for(int n = 0; n < ipd.time_steps; n++) {
 
         mat delta_conc = updateConc(lambda_t,varpi_hor,varpi_ver,dx,dy,ipd.dt);
         conc_t += delta_conc;
-	correctNegative(conc_t);
+        correctNegative(conc_t);
         mass_out(n) = conc_t.row(R-1).sum()*dV; // save flow out of system
         conc_t.row(R-1).setZero(); // set zero concentration at bottom boundary (i.e. sink)
         lambda_t = conc_t.cwiseProduct(s_nodes.cwiseInverse()); // update standard activity
@@ -108,7 +111,11 @@ void nonsteadystate(InputData ipd, mat varpi_hor, mat varpi_ver, mat s_nodes) {
             conc_t.row(0) /= dV_above_current; // calculate concentration based on conserved mass and new volume
         }
         volume_change(n) = dV_above_current;
+        ++pb;
+        if( n % 100 )
+            pb.display();
     }
+    pb.end_of_process();
     writeMatrixToFile(ipd.output_folder+"volume_change.txt",volume_change);
     writeMatrixToFile(ipd.output_folder+"mass_out.txt",mass_out);
 
