@@ -6,11 +6,11 @@ t             1.0    # brick thickness
 N             5      # nbr of layers of bricks
 omega         1.0    # offset ratio, negative gives random
 c_out         1.0    # concentration on one side of system (zero on the other)
-S_out         1.0    # solubility outside system
-S_mv          1e1    # mortar solubility (verticle)
-S_mh          1e1    # mortar solubility (horizontal)
-S_bv          1e-1   # brick solubility (verticle)
-S_bh          1e-1   # brick solubility (horizontal)
+S_out         2.0    # solubility outside system
+S_mv          1.0    # mortar solubility (verticle)
+S_mh          1.0    # mortar solubility (horizontal)
+S_bv          1.0   # brick solubility (verticle)
+S_bh          1.0   # brick solubility (horizontal)
 D_mv          1.0    # mortar diffusion coefficient (verticle)
 D_mh          1.0    # mortar diffusion coefficient (horizontal)
 D_bv          1.0    # brick diffusion coefficient (verticle)

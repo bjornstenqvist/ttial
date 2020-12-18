@@ -15,13 +15,13 @@ class InputData {
     public:
         int R, C, N, seed, model_nbr;
         double d, s, g, t, omega, S_mv, S_mh, S_bv, S_bh, S_mtv, S_mth, D_mtv, D_mth, D_mv, D_mh, D_bv, D_bh, DLambda, z_break, height, width, c_out, S_out, evap_time, evap_left; // DLambda superfluous?
-        bool load_external;
+        bool load_external; //!< Load external input?
         std::string input_folder, output_folder, output_file;
         const double inf = std::numeric_limits<double>::infinity();
 
         int time_steps, sample;
-        double time_periodic;
-        double dt;
+        double time_periodic; //!< Time between applying updated boundary conditions
+        double dt; //!< Time-step
         bool evaporate, display;
 
         /**

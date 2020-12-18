@@ -327,7 +327,7 @@ mat addBoundariesToMatrix(const mat &in, const double top, const double bottom) 
     return out;
 }
 
-void calcProp(mat &varpi_hor, mat &varpi_ver, mat &s_hor, mat &s_ver, mat &V_nodes, double height, double width, double c_out, std::string output_folder, std::string output_file) {
+void calcProp(mat &varpi_hor, mat &varpi_ver, mat &s_hor, mat &s_ver, mat &V_nodes, double height, double width, double c_out, double S_out, std::string output_folder, std::string output_file) {
     assert(compatibleSizes(varpi_ver,varpi_hor,s_ver,s_hor));
     assert(V_nodes.cols() == s_hor.cols());
     assert(V_nodes.rows() == s_hor.rows()+2);
@@ -363,8 +363,9 @@ void calcProp(mat &varpi_hor, mat &varpi_ver, mat &s_hor, mat &s_ver, mat &V_nod
     jva.col(1) = jv.rowwise().mean();
     jha.col(1) = jh.cwiseAbs().rowwise().mean();
 
+    double c_in = c_out * s_ver.row(0).mean()/S_out;
     appendDataToFile(output_file,"P_eff "+to_string_precision(-jva.col(1).mean()/c_out)+"\n"); // generate output to file
-    appendDataToFile(output_file,"D_eff "+to_string_precision(-jva.col(1).mean()/c_out*height)+"\n"); // generate output to file
+    appendDataToFile(output_file,"D_eff "+to_string_precision(-jva.col(1).mean()/c_in*height)+"\n"); // generate output to file
     appendDataToFile(output_file,"j_ver "+to_string_precision(jva.col(1).mean())+"\n"); // generate output to file
     appendDataToFile(output_file,"j_hor "+to_string_precision(jha.col(1).mean())+"\n"); // generate output to file
     writeMatrixToFile(output_folder+"j_ver_vector.txt", jva);

@@ -12,6 +12,7 @@ This is a C++ software for calculating membrane concentration-profiles, fluxes, 
 ### Requirements
 
 - C++14 compiler
+- CMake
 - The Eigen matrix library
 
 ### Building
@@ -49,6 +50,8 @@ ipython brick_and_mortar.py
 
 #### Non Steady State
 
+A non steady state example of a Brick and Mortar system can be run by executing the following commands
+
 ~~~ bash
 cd examples/nonsteadystate
 ../../advacuum input.txt
@@ -65,43 +68,50 @@ Important! Note that the input-file must end at the last input-row. If empty row
 
 Input parameter    |   Unit   |   Type   | Description
 ------------------ | -------- | -------- | -------------------
-`model_nbr`	   | unitless | integer  | model number, 0 gives Brick and Mortar
-`d`		   | m        | double   | width of bricks
-`s`		   | m        | double   | horizontal spacing between bricks
-`g`		   | m        | double   | vertical spacing between bricks
-`t`		   | m        | double   | brick thickness
-`N`		   | unitless | integer  | nbr of layers of bricks
-`omega`		   | unitless | double   | offset ratio, negative gives random
-`c_out`		   | kg/m^3   | double   | concentration outside system at upper boundary
-`S_out`		   | kg/m^3   | double   | solubility outside system
-`S_mv`		   | kg/m^3   | double   | mortar solubility (verticle)
-`S_mh`		   | kg/m^3   | double   | mortar solubility (horizontal)
-`S_bv`		   | kg/m^3   | double   | brick solubility (verticle)
-`S_bh`		   | kg/m^3   | double   | brick solubility (horizontal)
-`D_mv`		   | m^2/s    | double   | mortar diffusion coefficient (verticle)
-`D_mh`		   | m^2/s    | double   | mortar diffusion coefficient (horizontal)
-`D_bv`		   | m^2/s    | double   | brick diffusion coefficient (verticle)
-`D_bh`		   | m^2/s    | double   | brick diffusion coefficient (horizontal)
-`seed`		   | unitless | integer  | seed, negative gives random
-`Nc`		   | unitless | integer  | number of columns of nodes
-`Nr`		   | unitless | integer  | number of rows of nodes
-`height`	   | m        | double   | height of system, only relevant when loading an external mesh
-`width`		   | m        | double   | width of system, only relevant when loading an external mesh
-`load_external`	   | N/A      | bool     | load external mesh, default: false
-`input_folder`     | N/A      | string   | folder from which input is loaded, default: current directory, only relevant when loading an external mesh 
-`output_folder`    | N/A      | string   | folder in which output is put, default:  current directory
-`output_file`      | N/A      | string   | name of output-file, default: output.txt
+`model_nbr`	   | unitless | integer  | Model number, 0 gives Brick and Mortar
+`d`		   | m        | double   | Width of bricks
+`s`		   | m        | double   | Horizontal spacing between bricks
+`g`		   | m        | double   | Vertical spacing between bricks
+`t`		   | m        | double   | Brick thickness
+`N`		   | unitless | integer  | Number of layers of bricks
+`omega`		   | unitless | double   | Offset ratio, negative gives random
+`c_out`		   | kg/m^3   | double   | Concentration outside system at upper boundary
+`S_out`		   | kg/m^3   | double   | Solubility outside system
+`S_mv`		   | kg/m^3   | double   | Mortar solubility (verticle)
+`S_mh`		   | kg/m^3   | double   | Mortar solubility (horizontal)
+`S_bv`		   | kg/m^3   | double   | Brick solubility (verticle)
+`S_bh`		   | kg/m^3   | double   | Brick solubility (horizontal)
+`S_mtv`		   | kg/m^3   | double   | Mortar solubility (verticle) at upper boundary. Only used for `model_nbr` equal one
+`S_mth`		   | kg/m^3   | double   | Mortar solubility (horizontal) at upper boundary. Only used for `model_nbr` equal one
+`D_mv`		   | m^2/s    | double   | Mortar diffusion coefficient (verticle)
+`D_mh`		   | m^2/s    | double   | Mortar diffusion coefficient (horizontal)
+`D_mtv`		   | m^2/s    | double   | Mortar diffusion coefficient (verticle) at upper boundary. Only used for `model_nbr` equal one
+`D_mth`		   | m^2/s    | double   | Mortar diffusion coefficient (horizontal) at upper boundary. Only used for `model_nbr` equal one
+`D_bv`		   | m^2/s    | double   | Brick diffusion coefficient (verticle)
+`D_bh`		   | m^2/s    | double   | Brick diffusion coefficient (horizontal)
+`z_break`	   | m        | double   | Cross-over point between linear and constant regions of the membrane. Only used for `model_nbr` equal one
+`seed`		   | unitless | integer  | Seed, negative gives random
+`Nc`		   | unitless | integer  | Number of columns of nodes
+`Nr`		   | unitless | integer  | Number of rows of nodes
+`height`	   | m        | double   | Height of system, only relevant when loading an external mesh
+`width`		   | m        | double   | Width of system, only relevant when loading an external mesh
+`load_external`	   | -        | bool     | Load external mesh, default: false
+`input_folder`     | -        | string   | Folder from which input is loaded, default: current directory, only relevant when loading an external mesh 
+`output_folder`    | -        | string   | Folder in which output is put, default:  current directory
+`output_file`      | -        | string   | Name of output-file, default: output.txt
 
 #### Exclusive non-steady state input
 
 Input parameter    |   Unit   |   Type   | Description
 ------------------ | -------- | -------- | -------------------
-`time_steps`	   | unitless | integer  | number of iterations in time
-`sample`	   | unitless | integer  | interval for output samples
-`dt`		   | s        | double   | time-step
-`time_periodic`	   | s        | double   | time between applying `c_out` at upper boundary
-`evaporate`	   | N/A      | bool     | evaporate volume at upper boundary, default: false
-`display`	   | N/A      | bool     | display progressbar or not, default: true
+`time_steps`	   | unitless | integer  | Number of iterations in time
+`sample`	   | unitless | integer  | Interval for output samples
+`dt`		   | s        | double   | Time-step
+`time_periodic`	   | s        | double   | Time between applying `c_out` at upper boundary
+`evaporate`	   | -        | bool     | Evaporate volume at upper boundary, default: false
+`display`	   | -        | bool     | Display progressbar or not, default: true
+`evap_time`	   | s        | double   | Time after which `evap_left` volume fraction is left at upper boundary. Only used if `evaporate` is true.
+`evap_left`	   | unitless | double   | Volume fraction at upper boundary after which `evap_time` is left. Only used if `evaporate` is true.
 
 ### Output data
 
@@ -118,7 +128,7 @@ Data in `output.txt`        |   Unit    | Description
 `K_{M_hor/B_hor}`           |  unitless | Partition coefficient between mortar and bricks (both horizontal)
 `height`                    |  m        | Height of system
 `width`                     |  m        | Width of system
-`Time`                      |   -       | Time to run the software [Days/Hours/Minutes/Seconds]
+`Time`                      |  -        | Time to run the software [Days/Hours/Minutes/Seconds]
 
 #### Exclusive steady state output
 
@@ -138,11 +148,13 @@ Output files                |   Unit    | Description
 
 Data in `output.txt`        |   Unit    | Description
 --------------------------- | --------- | -------------
-`I_bot_sum`                 |  kg/m^2 s | Flux out of the system
-`I_top_sum`                 |  kg/m^2 s | Flux into the system
-`Reff`                      |  s m / kg | Effective resistance of the whole system
-`j_ver`                     |  kg/m^2 s | Mean value of data in `jv_vector.txt`
-`j_hor`                     |  kg/m^2 s | Mean value of data in `jh_vector.txt`
+`j_ver`                     |  kg/m^2 s | Mean value of flux into/out of the system, i.e. mean value of data in `jv_vector.txt`
+`j_hor`                     |  kg/m^2 s | Mean of absolute value of lateral flux in the system, i.e. mean value of data in `jh_vector.txt`
+`P_eff`                     |  m / s    | Effective permeability of the whole system, `P_eff` = -`j_ver` / `c_out`
+`D_eff`                     |  m^2 / s  | Effective diffusion coefficient of the whole system, `D_eff` = -`j_ver` * `height` / c_inside
+`I_bot_sum`                 |  kg/m^2 s | Flux out of the system, sum over all columns. Should equal `I_top_sum` otherwise not steady-state
+`I_top_sum`                 |  kg/m^2 s | Flux into the system, sum over all columns. Should equal `I_bot_sum` otherwise not steady-state
+`R_eff`                     |  s m / kg | Effective resistance of the whole system
 
 #### Exclusive non-steady state output
 
@@ -150,5 +162,5 @@ Output files                |   Unit    | Description
 --------------------------- | --------- | -------------
 `sn_matrix.txt`             |  kg/m^3   | Solubility in the nodes [FIX no such for steay-state]
 `conc_X.txt`                |  kg/m^3   | Concentration profile, sample `X`
-`volume_change.txt`         |  m^3      | volume of elements outside of upper boundary, vector in time
-`mass_out.txt`              |  kg       | mass flowing out of the lower boundary, vector in time
+`volume_change.txt`         |  m^3      | Volume of elements outside of upper boundary, vector in time
+`mass_out.txt`              |  kg       | Mass flowing out of the lower boundary, vector in time
