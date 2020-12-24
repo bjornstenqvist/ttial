@@ -92,8 +92,19 @@ double PBC_1D(const double x, const double Lx) {
     return x;
 }
 
-std::string to_string_precision(const double val, const int precision = 15)
-{
+std::string to_string_precision(const int val) {
+    std::ostringstream out;
+    out << val;
+    return out.str();
+}
+
+std::string to_string_precision(const double val) {
+    std::ostringstream out;
+    out << std::scientific << val;
+    return out.str();
+}
+
+std::string to_string_precision(const double val, const int precision) {
     std::ostringstream out;
     out.precision(precision);
     out << std::fixed << val;

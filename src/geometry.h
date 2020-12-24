@@ -293,7 +293,13 @@ void Geometry::getBricks(InputData ipd, std::vector<double> &xv, std::vector<dou
 }
 
 void Geometry::custom_made(mat &s_hor, mat &s_ver, mat &s_nodes, mat &D_hor, mat &D_ver, double &height, double &width, InputData ipd, std::string &name) {
-    //Geometry::checkInputForBrickAndMortar(ipd);
+    if(ipd.recX.size() != ipd.recY.size()) std::cerr << "'recX' and 'recY' is not same size\n"; exit(EXIT_FAILURE);
+    if(ipd.recX.size() != ipd.recW.size()) std::cerr << "'recX' and 'recW' is not same size\n"; exit(EXIT_FAILURE);
+    if(ipd.recX.size() != ipd.recH.size()) std::cerr << "'recX' and 'recH' is not same size\n"; exit(EXIT_FAILURE);
+    if(ipd.recX.size() != ipd.recVS.size()) std::cerr << "'recX' and 'recVS' is not same size\n"; exit(EXIT_FAILURE);
+    if(ipd.recX.size() != ipd.recVD.size()) std::cerr << "'recX' and 'recVD' is not same size\n"; exit(EXIT_FAILURE);
+    if(ipd.recX.size() != ipd.recHS.size()) std::cerr << "'recX' and 'recHS' is not same size\n"; exit(EXIT_FAILURE);
+    if(ipd.recX.size() != ipd.recHD.size()) std::cerr << "'recX' and 'recHD' is not same size\n"; exit(EXIT_FAILURE);
 
     name = "custom_made";
     width = ipd.width;

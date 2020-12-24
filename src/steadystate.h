@@ -47,12 +47,11 @@ void calcNodeAbsActivities(mat &res_hor, mat &res_ver, double DeltaV, double dy,
     double I_bot_sum = I_bot.sum();  // current going out of system
     appendDataToFile(output_file,"I_bot_sum "+to_string_precision(I_bot_sum)+"\n");
     appendDataToFile(output_file,"I_top_sum "+to_string_precision(I_top_sum)+"\n");
-    assert(("flow into system is different than that out of system" && std::fabs(1.0-I_bot_sum/I_top_sum) < 1e-6));  // makes sure flow out of mesh equals that into mesh, i.e. steady-state
+    if( std::fabs(1.0-I_bot_sum/I_top_sum) < 1e-6 )  // makes sure flow out of mesh equals that into mesh, i.e. steady-state
+        std::cerr << "flow into system is different from that out of system. Check 'I_bot_sum' and 'I_top_sum' in output-file for more information.\n";
 
     // calculate effective resistance
     double Reff = ( DeltaV - 0.0 ) / I_top_sum;
-
-
     appendDataToFile(output_file,"R_eff "+to_string_precision(Reff)+"\n"); // generate output to file
 }
 
