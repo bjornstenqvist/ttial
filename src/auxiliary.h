@@ -334,7 +334,6 @@ void calcProp(mat &varpi_hor, mat &varpi_ver, mat &s_hor, mat &s_ver, mat &V_nod
 
     double dy = height/double(varpi_ver.rows());
     double dx = width/double(varpi_hor.cols());
-
     mat concV = mat::Zero(varpi_ver.rows(),varpi_ver.cols());
     mat concH = mat::Zero(varpi_hor.rows(),varpi_hor.cols());
     mat jv = mat::Zero(varpi_ver.rows(),varpi_ver.cols());
@@ -345,7 +344,6 @@ void calcProp(mat &varpi_hor, mat &varpi_ver, mat &s_hor, mat &s_ver, mat &V_nod
             concV(r,c) = 0.5 * ( V_nodes(r,c) + V_nodes(r+1,c) ) * s_ver(r,c);
             jv(r,c) = - varpi_ver(r,c) * ( V_nodes(r,c) - V_nodes(r+1,c) ) / dy;
         }
-
     for(int r = 0; r < varpi_hor.rows(); r++) {
         for(int c = 0; c < varpi_hor.cols()-1; c++) {
             concH(r,c) = 0.5 * ( V_nodes(r,c) + V_nodes(r,c+1) ) * s_hor(r,c);

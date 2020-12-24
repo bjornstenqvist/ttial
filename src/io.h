@@ -19,6 +19,8 @@ class InputData {
         std::string input_folder, output_folder, output_file;
         const double inf = std::numeric_limits<double>::infinity();
 
+        std::vector<double> recX, recY, recW, recH, recVD, recVS, recHD, recHS;
+
         int time_steps, sample;
         double time_periodic; //!< Time between applying updated boundary conditions
         double dt; //!< Time-step
@@ -78,6 +80,16 @@ class InputData {
 
             evaporate = false;
             display = true;
+
+            recX.resize(0);
+            recY.resize(0);
+            recW.resize(0);
+            recH.resize(0);
+            recVD.resize(0);
+            recVS.resize(0);
+            recHD.resize(0);
+            recHS.resize(0);
+
 
             if (myfile.is_open())
             {
@@ -170,6 +182,44 @@ class InputData {
                         evap_time = std::stod(result.at(1));
                     if (result.at(0).compare("evap_left") == 0)
                         evap_left = std::stod(result.at(1));
+
+
+                    if (result.at(0).compare("recX") == 0) {
+                        for(unsigned int k = 1; k < result.size(); k++)
+                            recX.push_back(std::stod(result.at(k)));
+                    }
+                    if (result.at(0).compare("recY") == 0) {
+                        for(unsigned int k = 1; k < result.size(); k++)
+                            recY.push_back(std::stod(result.at(k)));
+                    }
+                    if (result.at(0).compare("recW") == 0) {
+                        for(unsigned int k = 1; k < result.size(); k++)
+                            recW.push_back(std::stod(result.at(k)));
+                    }
+                    if (result.at(0).compare("recH") == 0) {
+                        for(unsigned int k = 1; k < result.size(); k++)
+                            recH.push_back(std::stod(result.at(k)));
+                    }
+                    if (result.at(0).compare("recVS") == 0) {
+                        for(unsigned int k = 1; k < result.size(); k++)
+                            recVS.push_back(std::stod(result.at(k)));
+                    }
+                    if (result.at(0).compare("recVD") == 0) {
+                        for(unsigned int k = 1; k < result.size(); k++)
+                            recVD.push_back(std::stod(result.at(k)));
+                    }
+                    if (result.at(0).compare("recHS") == 0) {
+                        for(unsigned int k = 1; k < result.size(); k++)
+                            recHS.push_back(std::stod(result.at(k)));
+                    }
+                    if (result.at(0).compare("recHD") == 0) {
+                        for(unsigned int k = 1; k < result.size(); k++)
+                            recHD.push_back(std::stod(result.at(k)));
+                    }
+
+
+
+
                 }
                 myfile.close();
             }

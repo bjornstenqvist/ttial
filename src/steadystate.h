@@ -11,7 +11,6 @@
  * @param output_file name of output-file
  */
 void calcNodeAbsActivities(mat &res_hor, mat &res_ver, double DeltaV, double dy, std::string output_folder, std::string output_file) {
-
     // initialize nodes
     std::vector<Node> nodes;
     int nbr_of_nodes = res_hor.rows()*res_hor.cols();
@@ -31,7 +30,6 @@ void calcNodeAbsActivities(mat &res_hor, mat &res_ver, double DeltaV, double dy,
     // calculates inverse of Rinv - heart of program
     //mat R = Rinv.inverse();                             // more effective for small systems (I think...)
     mat R = splitInverse(Rinv);                           // more effective for large systems
-
     // gets potential throughout the mesh
     vec V = R*I;
     mat V_nodes = convertVector2Matrix(V,res_hor.rows(),res_hor.cols()); // convert potential in nodes from vector- to matrix-shape
@@ -47,13 +45,14 @@ void calcNodeAbsActivities(mat &res_hor, mat &res_ver, double DeltaV, double dy,
     }
     double I_top_sum = I_top.sum();  // current going into system
     double I_bot_sum = I_bot.sum();  // current going out of system
+    appendDataToFile(output_file,"I_bot_sum "+to_string_precision(I_bot_sum)+"\n");
+    appendDataToFile(output_file,"I_top_sum "+to_string_precision(I_top_sum)+"\n");
     assert(("flow into system is different than that out of system" && std::fabs(1.0-I_bot_sum/I_top_sum) < 1e-6));  // makes sure flow out of mesh equals that into mesh, i.e. steady-state
 
     // calculate effective resistance
     double Reff = ( DeltaV - 0.0 ) / I_top_sum;
 
-    appendDataToFile(output_file,"I_bot_sum "+to_string_precision(I_bot_sum)+"\n");
-    appendDataToFile(output_file,"I_top_sum "+to_string_precision(I_top_sum)+"\n");
+
     appendDataToFile(output_file,"R_eff "+to_string_precision(Reff)+"\n"); // generate output to file
 }
 
@@ -65,7 +64,6 @@ void steadystate(InputData ipd, mat varpi_hor, mat varpi_ver, mat s_hor, mat s_v
 
     double dy = ipd.height/double(ipd.R+1);
     calcNodeAbsActivities(res_hor,res_ver,ipd.DLambda,dy,ipd.output_folder,ipd.output_file); // perform main calculations, i.e. get potential in nodes
-
     // generate output and end program
     mat Lambda_mat = loadMatrix(ipd.output_folder+"V_matrix.txt"); // load output from 'calcNodeAbsActivities' which is written to file
     calcProp(varpi_hor,varpi_ver,s_hor,s_ver,Lambda_mat,ipd.height,ipd.width,ipd.c_out,ipd.S_out,ipd.output_folder,ipd.output_file); // calculate concentrations and fluxes

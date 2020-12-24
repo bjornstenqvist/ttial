@@ -9,16 +9,19 @@ class Geometry
 {
     public:
         void fillGeometryWithTunnels(mat &A_mat, mat &B_mat, double A_sca, double B_sca, int x_start);
-        void fillGeometryWithCircles(mat &A_mat, mat &B_mat, double A_sca, double B_sca, std::vector<double> xv, std::vector<double> yv, std::vector<double> rcv, double dx, double dy, double L, double offset);
-        void fillGeometryWithRectangles(mat &A_mat, mat &B_mat, double A_sca, double B_sca, std::vector<double> xv, std::vector<double> yv, double d, double t, double dx, double dy, double L, double offset);
-        void fillGeometryWithRectanglesNodes(mat &A_mat, double A_sca, std::vector<double> xv, std::vector<double> yv, double d, double t, double width, double height);
-        void fillGeometryWithRectanglesHor(mat &A_mat, mat &B_mat, double A_sca, double B_sca, std::vector<double> xv, std::vector<double> yv, double d, double t, double width, double height);
-        void fillGeometryWithRectanglesVer(mat &A_mat, mat &B_mat, double A_sca, double B_sca, std::vector<double> xv, std::vector<double> yv, double d, double t, double width, double height);
+        void fillGeometryWithCirclesHor(mat &A_mat, mat &B_mat, std::vector<double> A_sca, std::vector<double> B_sca, std::vector<double> xv, std::vector<double> yv, std::vector<double> rcv, double width, double height);
+        void fillGeometryWithCirclesVer(mat &A_mat, mat &B_mat, std::vector<double> A_sca, std::vector<double> B_sca, std::vector<double> xv, std::vector<double> yv, std::vector<double> rcv, double width, double height);
+        void fillGeometryWithCirclesNodes(mat &A_mat, std::vector<double> A_sca, std::vector<double> xv, std::vector<double> yv, std::vector<double> rcv, double width, double height);
+        void fillGeometryWithRectangles(mat &A_mat, mat &B_mat, std::vector<double> A_sca, std::vector<double> B_sca, std::vector<double> xv, std::vector<double> yv, std::vector<double> dv, std::vector<double> tv, double dx, double dy, double L, double offset);
+        void fillGeometryWithRectanglesNodes(mat &A_mat, std::vector<double> A_sca, std::vector<double> xv, std::vector<double> yv, std::vector<double> dv, std::vector<double> tv, double width, double height);
+        void fillGeometryWithRectanglesHor(mat &A_mat, mat &B_mat, std::vector<double> A_sca, std::vector<double> B_sca, std::vector<double> xv, std::vector<double> yv, std::vector<double> dv, std::vector<double> tv, double width, double height);
+        void fillGeometryWithRectanglesVer(mat &A_mat, mat &B_mat, std::vector<double> A_sca, std::vector<double> B_sca, std::vector<double> xv, std::vector<double> yv, std::vector<double> dv, std::vector<double> tv, double width, double height);
         void brickAndMortar(mat &s_hor, mat &s_ver, mat &s_nodes, mat &D_hor, mat &D_ver, double &height, double &width, InputData ipd, std::string &name);
+        void custom_made(mat &s_hor, mat &s_ver, mat &s_nodes, mat &D_hor, mat &D_ver, double &height, double &width, InputData ipd, std::string &name);
         void brickAndMortarDualLinear(mat &s_hor, mat &s_ver, mat &s_nodes, mat &D_hor, mat &D_ver, double &height, double &width, InputData ipd, std::string &name);
         void getGeometry(mat &s_hor, mat &s_ver, mat &s_nodes, mat &D_hor, mat &D_ver, InputData &ipd);
         void checkInputForBrickAndMortar(InputData ipd);
-        void getBricks(InputData ipd, std::vector<double> &xv, std::vector<double> &yv);
+        void getBricks(InputData ipd, std::vector<double> &xv, std::vector<double> &yv, std::vector<double> &dv, std::vector<double> &tv, std::vector<double> &Sv, std::vector<double> &Sh, std::vector<double> &Dv, std::vector<double> &Dh);
 };
 
 /**
@@ -79,19 +82,62 @@ void Geometry::fillGeometryWithTunnels(mat &A_mat, mat &B_mat, double A_sca, dou
  * @param L Lateral period
  * @param offset For vertical components 'offset=0.0', while for horizontal components 'offset=1.0'
  */
-void Geometry::fillGeometryWithCircles(mat &A_mat, mat &B_mat, double A_sca, double B_sca, std::vector<double> xv, std::vector<double> yv, std::vector<double> rcv, double dx, double dy, double L, double offset) {
+void Geometry::fillGeometryWithCirclesHor(mat &A_mat, mat &B_mat, std::vector<double> A_sca, std::vector<double> B_sca, std::vector<double> xv, std::vector<double> yv, std::vector<double> rcv, double width, double height) {
+    double dx = width/double(A_mat.cols());
+    double dy = height/double(A_mat.rows()+1);
     for(unsigned int r = 0; r < A_mat.rows(); r++)
         for(unsigned int c = 0; c < A_mat.cols(); c++) {
-            double x = ( double(c) + 0.5 ) * dx; // center of resistance
-            double y = ( double(2*r) + 0.5 + offset ) * dy; // the 'two' counts one vertical layer and one horizontal layer
+            double x = ( double(c) + 0.5 ) * dx + dx*1e-9; // center of resistance
+            double y = ( double(r) + 1.0 ) * dy + dy*1e-9; // the 'two' counts one vertical layer and one horizontal layer
 
             for(unsigned int i = 0; i < xv.size(); i++) {
-                double xn = std::fabs(PBC_1D(x-xv.at(i),L));
+                double xn = std::fabs(PBC_1D(x-xv.at(i),width));
                 double yn = std::fabs(y - yv.at(i));
 
                 if( xn*xn + yn*yn < rcv.at(i)*rcv.at(i)) {
-                    A_mat(r,c) = A_sca;
-                    B_mat(r,c) = B_sca;
+                    A_mat(r,c) = A_sca.at(i);
+                    B_mat(r,c) = B_sca.at(i);
+                    break;
+                }
+            }
+        }
+}
+
+void Geometry::fillGeometryWithCirclesVer(mat &A_mat, mat &B_mat, std::vector<double> A_sca, std::vector<double> B_sca, std::vector<double> xv, std::vector<double> yv, std::vector<double> rcv, double width, double height) {
+    double dx = width/double(A_mat.cols());
+    double dy = height/double(A_mat.rows());
+    for(unsigned int r = 0; r < A_mat.rows(); r++)
+        for(unsigned int c = 0; c < A_mat.cols(); c++) {
+            double x = double(c) * dx + dx*1e-9; // center of resistance
+            double y = ( double(r) + 0.5 ) * dy + dy*1e-9; // the 'two' counts one vertical layer and one horizontal layer
+
+            for(unsigned int i = 0; i < xv.size(); i++) {
+                double xn = std::fabs(PBC_1D(x-xv.at(i),width));
+                double yn = std::fabs(y - yv.at(i));
+
+                if( xn*xn + yn*yn < rcv.at(i)*rcv.at(i)) {
+                    A_mat(r,c) = A_sca.at(i);
+                    B_mat(r,c) = B_sca.at(i);
+                    break;
+                }
+            }
+        }
+}
+
+void Geometry::fillGeometryWithCirclesNodes(mat &A_mat, std::vector<double> A_sca, std::vector<double> xv, std::vector<double> yv, std::vector<double> rcv, double width, double height) {
+    double dx = width/double(A_mat.cols());
+    double dy = height/double(A_mat.rows());
+    for(unsigned int r = 0; r < A_mat.rows(); r++)
+        for(unsigned int c = 0; c < A_mat.cols(); c++) {
+            double x = double(c) * dx + dx*1e-9; // center of resistance
+            double y = ( double(r) + 1.0 ) * dy + dy*1e-9; // the 'two' counts one vertical layer and one horizontal layer
+
+            for(unsigned int i = 0; i < xv.size(); i++) {
+                double xn = std::fabs(PBC_1D(x-xv.at(i),width));
+                double yn = std::fabs(y - yv.at(i));
+
+                if( xn*xn + yn*yn < rcv.at(i)*rcv.at(i)) {
+                    A_mat(r,c) = A_sca.at(i);
                     break;
                 }
             }
@@ -113,7 +159,7 @@ void Geometry::fillGeometryWithCircles(mat &A_mat, mat &B_mat, double A_sca, dou
  * @param L Lateral period
  * @param offset For vertical components 'offset=0.0', while for horizontal components 'offset=1.0'
  */
-void Geometry::fillGeometryWithRectangles(mat &A_mat, mat &B_mat, double A_sca, double B_sca, std::vector<double> xv, std::vector<double> yv, double d, double t, double dx, double dy, double L, double offset) {
+void Geometry::fillGeometryWithRectangles(mat &A_mat, mat &B_mat, std::vector<double> A_sca, std::vector<double> B_sca, std::vector<double> xv, std::vector<double> yv, std::vector<double> dv, std::vector<double> tv, double dx, double dy, double L, double offset) {
     assert(xv.size() == yv.size());
     for(unsigned int r = 0; r < A_mat.rows(); r++)
         for(unsigned int c = 0; c < A_mat.cols(); c++) {
@@ -124,16 +170,16 @@ void Geometry::fillGeometryWithRectangles(mat &A_mat, mat &B_mat, double A_sca, 
                 double xn = (PBC_1D(x-xv.at(i),L));
                 double yn = (y - yv.at(i));
 
-                if(xn >= -d/2.0 && xn < d/2.0 && yn >= -t/2.0 && yn < t/2.0) {
-                    A_mat(r,c) = A_sca;
-                    B_mat(r,c) = B_sca;
+                if(xn >= -dv.at(i)/2.0 && xn < dv.at(i)/2.0 && yn >= -tv.at(i)/2.0 && yn < tv.at(i)/2.0) {
+                    A_mat(r,c) = A_sca.at(i);
+                    B_mat(r,c) = B_sca.at(i);
                     break;
                 }
             }
         }
 }
 
-void Geometry::fillGeometryWithRectanglesNodes(mat &A_mat, double A_sca, std::vector<double> xv, std::vector<double> yv, double d, double t, double width, double height) {
+void Geometry::fillGeometryWithRectanglesNodes(mat &A_mat, std::vector<double> A_sca, std::vector<double> xv, std::vector<double> yv, std::vector<double> dv, std::vector<double> tv, double width, double height) {
     assert(xv.size() == yv.size());
     double dx = width/double(A_mat.cols());
     double dy = height/double(A_mat.rows()+1);
@@ -146,15 +192,15 @@ void Geometry::fillGeometryWithRectanglesNodes(mat &A_mat, double A_sca, std::ve
                 double xn = (PBC_1D(x-xv.at(i),width));
                 double yn = (y - yv.at(i));
 
-                if(xn >= -d/2.0 && xn < d/2.0 && yn >= -t/2.0 && yn < t/2.0) {
-                    A_mat(r,c) = A_sca;
+                if(xn >= -dv.at(i)/2.0 && xn < dv.at(i)/2.0 && yn >= -tv.at(i)/2.0 && yn < tv.at(i)/2.0) {
+                    A_mat(r,c) = A_sca.at(i);
                     break;
                 }
             }
         }
 }
 
-void Geometry::fillGeometryWithRectanglesHor(mat &A_mat, mat &B_mat, double A_sca, double B_sca, std::vector<double> xv, std::vector<double> yv, double d, double t, double width, double height) {
+void Geometry::fillGeometryWithRectanglesHor(mat &A_mat, mat &B_mat, std::vector<double> A_sca, std::vector<double> B_sca, std::vector<double> xv, std::vector<double> yv, std::vector<double> dv, std::vector<double> tv, double width, double height) {
     assert(xv.size() == yv.size());
     double dx = width/double(A_mat.cols());
     double dy = height/double(A_mat.rows()+1);
@@ -167,16 +213,16 @@ void Geometry::fillGeometryWithRectanglesHor(mat &A_mat, mat &B_mat, double A_sc
                 double xn = (PBC_1D(x-xv.at(i),width));
                 double yn = (y - yv.at(i));
 
-                if(xn >= -d/2.0 && xn < d/2.0 && yn >= -t/2.0 && yn < t/2.0) {
-                    A_mat(r,c) = A_sca;
-                    B_mat(r,c) = B_sca;
+                if(xn >= -dv.at(i)/2.0 && xn < dv.at(i)/2.0 && yn >= -tv.at(i)/2.0 && yn < tv.at(i)/2.0) {
+                    A_mat(r,c) = A_sca.at(i);
+                    B_mat(r,c) = B_sca.at(i);
                     break;
                 }
             }
         }
 }
 
-void Geometry::fillGeometryWithRectanglesVer(mat &A_mat, mat &B_mat, double A_sca, double B_sca, std::vector<double> xv, std::vector<double> yv, double d, double t, double width, double height) {
+void Geometry::fillGeometryWithRectanglesVer(mat &A_mat, mat &B_mat, std::vector<double> A_sca, std::vector<double> B_sca, std::vector<double> xv, std::vector<double> yv, std::vector<double> dv, std::vector<double> tv, double width, double height) {
     assert(xv.size() == yv.size());
     double dx = width/double(A_mat.cols());
     double dy = height/double(A_mat.rows());
@@ -189,9 +235,9 @@ void Geometry::fillGeometryWithRectanglesVer(mat &A_mat, mat &B_mat, double A_sc
                 double xn = (PBC_1D(x-xv.at(i),width));
                 double yn = (y - yv.at(i));
 
-                if(xn >= -d/2.0 && xn < d/2.0 && yn >= -t/2.0 && yn < t/2.0) {
-                    A_mat(r,c) = A_sca;
-                    B_mat(r,c) = B_sca;
+                if(xn >= -dv.at(i)/2.0 && xn < dv.at(i)/2.0 && yn >= -tv.at(i)/2.0 && yn < tv.at(i)/2.0) {
+                    A_mat(r,c) = A_sca.at(i);
+                    B_mat(r,c) = B_sca.at(i);
                     break;
                 }
             }
@@ -216,11 +262,23 @@ void Geometry::checkInputForBrickAndMortar(InputData ipd) {
     assert(("number of rows in mesh cannot be negative" && ipd.R >= 0));
 }
 
-void Geometry::getBricks(InputData ipd, std::vector<double> &xv, std::vector<double> &yv) {
+void Geometry::getBricks(InputData ipd, std::vector<double> &xv, std::vector<double> &yv, std::vector<double> &dv, std::vector<double> &tv, std::vector<double> &Sv, std::vector<double> &Sh, std::vector<double> &Dv, std::vector<double> &Dh) {
     xv.resize(0);
     yv.resize(0);
+    dv.resize(0);
+    tv.resize(0);
+    Sv.resize(0);
+    Sh.resize(0);
+    Dv.resize(0);
+    Dh.resize(0);
     double width = ipd.d + ipd.s;
     for(int n = 0; n < ipd.N; n += 2) {
+        dv.push_back(ipd.d);
+        tv.push_back(ipd.t);
+        Sv.push_back(ipd.S_bv);
+        Sh.push_back(ipd.S_bh);
+        Dv.push_back(ipd.D_bv);
+        Dh.push_back(ipd.D_bh);
         yv.push_back(ipd.t/2.0 + n*(ipd.t+ipd.g));
         yv.push_back(ipd.t/2.0 + (n+1)*(ipd.t+ipd.g));
 
@@ -233,6 +291,46 @@ void Geometry::getBricks(InputData ipd, std::vector<double> &xv, std::vector<dou
         }
     }
 }
+
+void Geometry::custom_made(mat &s_hor, mat &s_ver, mat &s_nodes, mat &D_hor, mat &D_ver, double &height, double &width, InputData ipd, std::string &name) {
+    //Geometry::checkInputForBrickAndMortar(ipd);
+
+    name = "custom_made";
+    width = ipd.width;
+    height = ipd.height;
+
+    // fill geometry with mortar ("background")
+    s_ver = mat::Ones(ipd.R+1,ipd.C)*ipd.S_mv;
+    s_hor = mat::Ones(ipd.R,ipd.C)*ipd.S_mh;
+    s_nodes = mat::Ones(ipd.R,ipd.C)*ipd.S_mh;
+    D_ver = mat::Ones(ipd.R+1,ipd.C)*ipd.D_mv;
+    D_hor = mat::Ones(ipd.R,ipd.C)*ipd.D_mh;
+
+    // calculate brick centers
+    std::vector<double> xv = ipd.recX;
+    std::vector<double> yv = ipd.recY;
+    std::vector<double> dv = ipd.recW;
+    std::vector<double> tv = ipd.recH;
+    std::vector<double> VS = ipd.recVS;
+    std::vector<double> VD = ipd.recVD;
+    std::vector<double> HS = ipd.recHS;
+    std::vector<double> HD = ipd.recHD;
+
+    fillGeometryWithRectanglesVer(s_ver,D_ver,VS,VD,xv,yv,dv,tv,width,height);
+    fillGeometryWithRectanglesHor(s_hor,D_hor,HS,HD,xv,yv,dv,tv,width,height);
+    fillGeometryWithRectanglesNodes(s_nodes,HS,xv,yv,dv,tv,width,height);
+    //fillGeometryWithCirclesHor(s_hor,D_hor,HS,HD,xv,yv,dv,width,height);
+    //fillGeometryWithCirclesVer(s_ver,D_ver,VS,VD,xv,yv,dv,width,height);
+    //fillGeometryWithCirclesNodes(s_ver,VS,xv,yv,dv,width,height);
+
+    insertRow(s_nodes,0,ipd.S_out);
+    s_nodes.conservativeResize(s_nodes.rows()+1, s_nodes.cols());
+    s_nodes.row(s_nodes.rows()-1) = ipd.S_out*vec::Ones(s_nodes.row(s_nodes.rows()-1).cols());
+}
+
+
+
+
 
 /**
  * @brief Get solubility and diffusion coefficient matrices for a brick and mortar system
@@ -261,12 +359,12 @@ void Geometry::brickAndMortar(mat &s_hor, mat &s_ver, mat &s_nodes, mat &D_hor, 
     D_hor = mat::Ones(ipd.R,ipd.C)*ipd.D_mh;
 
     // calculate brick centers
-    std::vector<double> xv, yv;
-    Geometry::getBricks(ipd,xv,yv);
+    std::vector<double> xv, yv, dv, tv, Sv, Sh, Dv, Dh;
+    Geometry::getBricks(ipd,xv,yv,dv,tv,Sv,Sh,Dv,Dh);
 
-    fillGeometryWithRectanglesVer(s_ver,D_ver,ipd.S_bv,ipd.D_bv,xv,yv,ipd.d,ipd.t,width,height);
-    fillGeometryWithRectanglesHor(s_hor,D_hor,ipd.S_bh,ipd.D_bh,xv,yv,ipd.d,ipd.t,width,height);
-    fillGeometryWithRectanglesNodes(s_nodes,ipd.S_bh,xv,yv,ipd.d,ipd.t,width,height);
+    fillGeometryWithRectanglesVer(s_ver,D_ver,Sv,Dv,xv,yv,dv,tv,width,height);
+    fillGeometryWithRectanglesHor(s_hor,D_hor,Sh,Dh,xv,yv,dv,tv,width,height);
+    fillGeometryWithRectanglesNodes(s_nodes,Sh,xv,yv,dv,tv,width,height);
     insertRow(s_nodes,0,ipd.S_out);
     s_nodes.conservativeResize(s_nodes.rows()+1, s_nodes.cols());
     s_nodes.row(s_nodes.rows()-1) = ipd.S_out*vec::Ones(s_nodes.row(s_nodes.rows()-1).cols());
@@ -362,7 +460,19 @@ void Geometry::brickAndMortarDualLinear(mat &s_hor, mat &s_ver, mat &s_nodes, ma
     // calculate brick centers
     std::vector<double> xv(0);
     std::vector<double> yv(0);
+    std::vector<double> dv(0);
+    std::vector<double> tv(0);
+    std::vector<double> Sv(0);
+    std::vector<double> Sh(0);
+    std::vector<double> Dv(0);
+    std::vector<double> Dh(0);
     for(int n = 0; n < ipd.N; n += 2) {
+        Sv.push_back(ipd.S_bv);
+        Sh.push_back(ipd.S_bh);
+        Dv.push_back(ipd.D_bv);
+        Dh.push_back(ipd.D_bh);
+        dv.push_back(ipd.d);
+        tv.push_back(ipd.t);
         yv.push_back(ipd.t/2.0 + n*(ipd.t+ipd.g));
         yv.push_back(ipd.t/2.0 + (n+1)*(ipd.t+ipd.g));
 
@@ -376,9 +486,9 @@ void Geometry::brickAndMortarDualLinear(mat &s_hor, mat &s_ver, mat &s_nodes, ma
     }
 
     // fill geometry with bricks ("foreground")
-    fillGeometryWithRectangles(s_ver,D_ver,ipd.S_bv,ipd.D_bv,xv,yv,ipd.d,ipd.t,res_width,res_hight,width,0.0);
-    fillGeometryWithRectangles(s_hor,D_hor,ipd.S_bh,ipd.D_bh,xv,yv,ipd.d,ipd.t,res_width,res_hight,width,1.0);
-    fillGeometryWithRectanglesNodes(s_nodes,ipd.S_bh,xv,yv,ipd.d,ipd.t,ipd.width,ipd.height);
+    fillGeometryWithRectangles(s_ver,D_ver,Sv,Dv,xv,yv,dv,tv,res_width,res_hight,width,0.0);
+    fillGeometryWithRectangles(s_hor,D_hor,Sh,Dh,xv,yv,dv,tv,res_width,res_hight,width,1.0);
+    fillGeometryWithRectanglesNodes(s_nodes,Sh,xv,yv,dv,tv,ipd.width,ipd.height);
     insertRow(s_nodes,0,ipd.S_out);
     s_nodes.conservativeResize(s_nodes.rows()+1, s_nodes.cols());
     s_nodes.row(s_nodes.rows()-1) = ipd.S_out*vec::Ones(s_nodes.row(s_nodes.rows()-1).cols());
@@ -407,19 +517,25 @@ void Geometry::getGeometry(mat &s_hor, mat &s_ver, mat &s_nodes, mat &D_hor, mat
         appendDataToFile(ipd.output_file,"model external\n");
     } else {
         std::string name = "";
-        if(ipd.model_nbr == 1) {
+        if(ipd.model_nbr == 2) {
+            custom_made(s_hor,s_ver,s_nodes,D_hor,D_ver,ipd.height,ipd.width,ipd,name);
+        } else if(ipd.model_nbr == 1) {
             brickAndMortarDualLinear(s_hor,s_ver,s_nodes,D_hor,D_ver,ipd.height,ipd.width,ipd,name);
+            appendDataToFile(ipd.output_file,"K_{M_ver/out} "+to_string_precision(ipd.S_mv/ipd.S_out) +"\n");
+            appendDataToFile(ipd.output_file,"K_{B_ver/out} "+to_string_precision(ipd.S_bv/ipd.S_out) +"\n");
+            appendDataToFile(ipd.output_file,"K_{M_ver/B_ver} "+to_string_precision(ipd.S_mv/ipd.S_bv) +"\n");
+            appendDataToFile(ipd.output_file,"K_{M_hor/B_hor} "+to_string_precision(ipd.S_mh/ipd.S_bh) +"\n");
         } else if(ipd.model_nbr == 0) {
             brickAndMortar(s_hor,s_ver,s_nodes,D_hor,D_ver,ipd.height,ipd.width,ipd,name);
+            appendDataToFile(ipd.output_file,"K_{M_ver/out} "+to_string_precision(ipd.S_mv/ipd.S_out) +"\n");
+            appendDataToFile(ipd.output_file,"K_{B_ver/out} "+to_string_precision(ipd.S_bv/ipd.S_out) +"\n");
+            appendDataToFile(ipd.output_file,"K_{M_ver/B_ver} "+to_string_precision(ipd.S_mv/ipd.S_bv) +"\n");
+            appendDataToFile(ipd.output_file,"K_{M_hor/B_hor} "+to_string_precision(ipd.S_mh/ipd.S_bh) +"\n");
         } else {
             std::cerr << "model not found\n";
             exit(EXIT_FAILURE);
         }
         appendDataToFile(ipd.output_file,"model "+name+"\n");
-        appendDataToFile(ipd.output_file,"K_{M_ver/out} "+to_string_precision(ipd.S_mv/ipd.S_out) +"\n");
-        appendDataToFile(ipd.output_file,"K_{B_ver/out} "+to_string_precision(ipd.S_bv/ipd.S_out) +"\n");
-        appendDataToFile(ipd.output_file,"K_{M_ver/B_ver} "+to_string_precision(ipd.S_mv/ipd.S_bv) +"\n");
-        appendDataToFile(ipd.output_file,"K_{M_hor/B_hor} "+to_string_precision(ipd.S_mh/ipd.S_bh) +"\n");
         writeMatrixToFile(ipd.output_folder+"sh_matrix.txt",s_hor);
         writeMatrixToFile(ipd.output_folder+"sv_matrix.txt",s_ver);
         writeMatrixToFile(ipd.output_folder+"sn_matrix.txt",s_nodes);
