@@ -1,9 +1,9 @@
-model_nbr     2     # model number, 0 gives Brick and Mortar
+model_nbr     0     # model number, 0 gives Brick and Mortar
 d             10.0   # width of bricks
 s             0.0   # horizontal spacing between bricks
 g             0.0   # vertical spacing between bricks
 t             5.0   # brick thickness
-N             10     # nbr of layers of bricks
+N             11     # nbr of layers of bricks
 omega         1.0   # offset ratio, negative gives random
 c_out         1.0   # concentration on one side of system (zero on the other)
 S_out         1.0   # solubility outside system

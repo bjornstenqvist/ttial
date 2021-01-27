@@ -250,51 +250,77 @@ class InputData {
             writeLoadedData();
         }
 
-
-        //bool load_external; //!< Load external input?
-        //std::string input_folder, output_folder, output_file;
-        //const double inf = std::numeric_limits<double>::infinity();
-
-        //std::vector<double> recX, recY, recW, recH, recVD, recVS, recHD, recHS;
-
-        //bool evaporate, display;
+        void writeVectorToLoadedValues(std::string filename, std::vector<double> vec_out, std::string name) {
+            for(unsigned int k = 0; k < vec_out.size(); k++)
+                name += " "+to_string_precision(vec_out.at(k));
+            if (vec_out.size() > 0) appendDataToFile(filename,name+"\n");
+        }
 
         void writeLoadedData() {
-            std::remove("loaded_values.txt"); // remove any eventual old output-file
-            if (R >= 0) appendDataToFile("loaded_values.txt","Nr "+to_string_precision(R)+"\n");
-            if (C >= 0) appendDataToFile("loaded_values.txt","Nc "+to_string_precision(C)+"\n");
-            if (N >= 0) appendDataToFile("loaded_values.txt","N "+to_string_precision(N)+"\n");
-            if (seed >= 0) appendDataToFile("loaded_values.txt","seed "+to_string_precision(seed)+"\n");
-            if (model_nbr >= 0) appendDataToFile("loaded_values.txt","model_nbr "+to_string_precision(model_nbr)+"\n");
-            if (d >= -0.05) appendDataToFile("loaded_values.txt","d "+to_string_precision(d)+"\n");
-            if (s >= -0.05) appendDataToFile("loaded_values.txt","s "+to_string_precision(s)+"\n");
-            if (g >= -0.05) appendDataToFile("loaded_values.txt","g "+to_string_precision(g)+"\n");
-            if (t >= -0.05) appendDataToFile("loaded_values.txt","t "+to_string_precision(t)+"\n");
-            if (omega >= -0.05) appendDataToFile("loaded_values.txt","omega "+to_string_precision(omega)+"\n");
-            if (S_mv >= -0.05) appendDataToFile("loaded_values.txt","S_mv "+to_string_precision(S_mv)+"\n");
-            if (S_mh >= -0.05) appendDataToFile("loaded_values.txt","S_mh "+to_string_precision(S_mh)+"\n");
-            if (S_bv >= -0.05) appendDataToFile("loaded_values.txt","S_bv "+to_string_precision(S_bv)+"\n");
-            if (S_bh >= -0.05) appendDataToFile("loaded_values.txt","S_bh "+to_string_precision(S_bh)+"\n");
-            if (S_mtv >= -0.05) appendDataToFile("loaded_values.txt","S_mtv "+to_string_precision(S_mtv)+"\n");
-            if (S_mth >= -0.05) appendDataToFile("loaded_values.txt","S_mth "+to_string_precision(S_mth)+"\n");
-            if (D_mtv >= -0.05) appendDataToFile("loaded_values.txt","D_mtv "+to_string_precision(D_mtv)+"\n");
-            if (D_mth >= -0.05) appendDataToFile("loaded_values.txt","D_mth "+to_string_precision(D_mth)+"\n");
-            if (D_mv >= -0.05) appendDataToFile("loaded_values.txt","D_mv "+to_string_precision(D_mv)+"\n");
-            if (D_mh >= -0.05) appendDataToFile("loaded_values.txt","D_mh "+to_string_precision(D_mh)+"\n");
-            if (D_bv >= -0.05) appendDataToFile("loaded_values.txt","D_bv "+to_string_precision(D_bv)+"\n");
-            if (D_bh >= -0.05) appendDataToFile("loaded_values.txt","D_bh "+to_string_precision(D_bh)+"\n");
-            if (z_break >= -0.05) appendDataToFile("loaded_values.txt","z_break "+to_string_precision(z_break)+"\n");
-            if (height >= -0.05) appendDataToFile("loaded_values.txt","height "+to_string_precision(height)+"\n");
-            if (width >= -0.05) appendDataToFile("loaded_values.txt","width "+to_string_precision(width)+"\n");
-            if (c_out >= -0.05) appendDataToFile("loaded_values.txt","c_out "+to_string_precision(c_out)+"\n");
-            if (S_out >= -0.05) appendDataToFile("loaded_values.txt","S_out "+to_string_precision(S_out)+"\n");
-            if (evap_time >= -0.05) appendDataToFile("loaded_values.txt","evap_time "+to_string_precision(evap_time)+"\n");
-            if (evap_left >= -0.05) appendDataToFile("loaded_values.txt","evap_left "+to_string_precision(evap_left)+"\n");
+            std::string filename = "loaded_and_available_data.txt";
+            std::remove(filename.c_str()); // remove any eventual old output-file
+            if (R >= 0) appendDataToFile(filename,"Nr "+to_string_precision(R)+"\n");
+            if (C >= 0) appendDataToFile(filename,"Nc "+to_string_precision(C)+"\n");
+            if (N >= 0) appendDataToFile(filename,"N "+to_string_precision(N)+"\n");
+            if (seed >= 0) appendDataToFile(filename,"seed "+to_string_precision(seed)+"\n");
+            if (model_nbr >= 0) appendDataToFile(filename,"model_nbr "+to_string_precision(model_nbr)+"\n");
+            if (d >= -0.05) appendDataToFile(filename,"d "+to_string_precision(d)+"\n");
+            if (s >= -0.05) appendDataToFile(filename,"s "+to_string_precision(s)+"\n");
+            if (g >= -0.05) appendDataToFile(filename,"g "+to_string_precision(g)+"\n");
+            if (t >= -0.05) appendDataToFile(filename,"t "+to_string_precision(t)+"\n");
+            if (omega >= -0.05) appendDataToFile(filename,"omega "+to_string_precision(omega)+"\n");
+            if (S_mv >= -0.05) appendDataToFile(filename,"S_mv "+to_string_precision(S_mv)+"\n");
+            if (S_mh >= -0.05) appendDataToFile(filename,"S_mh "+to_string_precision(S_mh)+"\n");
+            if (S_bv >= -0.05) appendDataToFile(filename,"S_bv "+to_string_precision(S_bv)+"\n");
+            if (S_bh >= -0.05) appendDataToFile(filename,"S_bh "+to_string_precision(S_bh)+"\n");
+            if (S_mtv >= -0.05) appendDataToFile(filename,"S_mtv "+to_string_precision(S_mtv)+"\n");
+            if (S_mth >= -0.05) appendDataToFile(filename,"S_mth "+to_string_precision(S_mth)+"\n");
+            if (D_mtv >= -0.05) appendDataToFile(filename,"D_mtv "+to_string_precision(D_mtv)+"\n");
+            if (D_mth >= -0.05) appendDataToFile(filename,"D_mth "+to_string_precision(D_mth)+"\n");
+            if (D_mv >= -0.05) appendDataToFile(filename,"D_mv "+to_string_precision(D_mv)+"\n");
+            if (D_mh >= -0.05) appendDataToFile(filename,"D_mh "+to_string_precision(D_mh)+"\n");
+            if (D_bv >= -0.05) appendDataToFile(filename,"D_bv "+to_string_precision(D_bv)+"\n");
+            if (D_bh >= -0.05) appendDataToFile(filename,"D_bh "+to_string_precision(D_bh)+"\n");
+            if (z_break >= -0.05) appendDataToFile(filename,"z_break "+to_string_precision(z_break)+"\n");
+            if (height >= -0.05) appendDataToFile(filename,"height "+to_string_precision(height)+"\n");
+            if (width >= -0.05) appendDataToFile(filename,"width "+to_string_precision(width)+"\n");
+            if (c_out >= -0.05) appendDataToFile(filename,"c_out "+to_string_precision(c_out)+"\n");
+            if (S_out >= -0.05) appendDataToFile(filename,"S_out "+to_string_precision(S_out)+"\n");
+            if (evap_time >= -0.05) appendDataToFile(filename,"evap_time "+to_string_precision(evap_time)+"\n");
+            if (evap_left >= -0.05) appendDataToFile(filename,"evap_left "+to_string_precision(evap_left)+"\n");
 
-            if (time_steps >= 0) appendDataToFile("loaded_values.txt","time_steps "+to_string_precision(time_steps)+"\n");
-            if (sample >= 0) appendDataToFile("loaded_values.txt","sample "+to_string_precision(sample)+"\n");
-            if (time_periodic >= -0.05) appendDataToFile("loaded_values.txt","time_periodic "+to_string_precision(time_periodic)+"\n");
-            if (dt >= -0.05) appendDataToFile("loaded_values.txt","dt "+to_string_precision(dt)+"\n");
+            if (time_steps >= 0) appendDataToFile(filename,"time_steps "+to_string_precision(time_steps)+"\n");
+            if (sample >= 0) appendDataToFile(filename,"sample "+to_string_precision(sample)+"\n");
+            if (time_periodic >= -0.05) appendDataToFile(filename,"time_periodic "+to_string_precision(time_periodic)+"\n");
+            if (dt >= -0.05) appendDataToFile(filename,"dt "+to_string_precision(dt)+"\n");
+
+            writeVectorToLoadedValues(filename,recX,"recX");
+            writeVectorToLoadedValues(filename,recY,"recY");
+            writeVectorToLoadedValues(filename,recW,"recW");
+            writeVectorToLoadedValues(filename,recH,"recH");
+            writeVectorToLoadedValues(filename,recVD,"recVD");
+            writeVectorToLoadedValues(filename,recVS,"recVS");
+            writeVectorToLoadedValues(filename,recHD,"recHD");
+            writeVectorToLoadedValues(filename,recHS,"recHS");
+
+            if (load_external)
+                appendDataToFile(filename,"load_external true\n");
+            else
+                appendDataToFile(filename,"load_external false\n");
+
+            if (evaporate)
+                appendDataToFile(filename,"evaporate true\n");
+            else
+                appendDataToFile(filename,"evaporate false\n");
+
+            if (display)
+                appendDataToFile(filename,"display true\n");
+            else
+                appendDataToFile(filename,"display false\n");
+
+            appendDataToFile(filename,"input_folder "+input_folder+"\n");
+            appendDataToFile(filename,"output_folder "+output_folder+"\n");
+            appendDataToFile(filename,"output_file "+output_file+"\n");
         }
 
         /**

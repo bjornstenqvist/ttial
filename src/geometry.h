@@ -273,12 +273,14 @@ void Geometry::getBricks(InputData ipd, std::vector<double> &xv, std::vector<dou
     Dh.resize(0);
     double width = ipd.d + ipd.s;
     for(int n = 0; n < ipd.N; n += 2) {
-        dv.push_back(ipd.d);
-        tv.push_back(ipd.t);
-        Sv.push_back(ipd.S_bv);
-        Sh.push_back(ipd.S_bh);
-        Dv.push_back(ipd.D_bv);
-        Dh.push_back(ipd.D_bh);
+        for(int i = 0; i < 2; i++) {
+            dv.push_back(ipd.d);
+            tv.push_back(ipd.t);
+            Sv.push_back(ipd.S_bv);
+            Sh.push_back(ipd.S_bh);
+            Dv.push_back(ipd.D_bv);
+            Dh.push_back(ipd.D_bh);
+        }
         yv.push_back(ipd.t/2.0 + n*(ipd.t+ipd.g));
         yv.push_back(ipd.t/2.0 + (n+1)*(ipd.t+ipd.g));
 
