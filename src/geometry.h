@@ -466,37 +466,46 @@ void Geometry::brickAndMortarDualLinear(mat &s_hor, mat &s_ver, mat &s_nodes, ma
     }
 
     // calculate brick centers
-    std::vector<double> xv(0);
-    std::vector<double> yv(0);
-    std::vector<double> dv(0);
-    std::vector<double> tv(0);
-    std::vector<double> Sv(0);
-    std::vector<double> Sh(0);
-    std::vector<double> Dv(0);
-    std::vector<double> Dh(0);
-    for(int n = 0; n < ipd.N; n += 2) {
-        Sv.push_back(ipd.S_bv);
-        Sh.push_back(ipd.S_bh);
-        Dv.push_back(ipd.D_bv);
-        Dh.push_back(ipd.D_bh);
-        dv.push_back(ipd.d);
-        tv.push_back(ipd.t);
-        yv.push_back(ipd.t/2.0 + n*(ipd.t+ipd.g));
-        yv.push_back(ipd.t/2.0 + (n+1)*(ipd.t+ipd.g));
+    /* OLD
+       std::vector<double> xv(0);
+       std::vector<double> yv(0);
+       std::vector<double> dv(0);
+       std::vector<double> tv(0);
+       std::vector<double> Sv(0);
+       std::vector<double> Sh(0);
+       std::vector<double> Dv(0);
+       std::vector<double> Dh(0);
+       for(int n = 0; n < ipd.N; n += 2) {
+       Sv.push_back(ipd.S_bv);
+       Sh.push_back(ipd.S_bh);
+       Dv.push_back(ipd.D_bv);
+       Dh.push_back(ipd.D_bh);
+       dv.push_back(ipd.d);
+       tv.push_back(ipd.t);
+       yv.push_back(ipd.t/2.0 + n*(ipd.t+ipd.g));
+       yv.push_back(ipd.t/2.0 + (n+1)*(ipd.t+ipd.g));
 
-        if(ipd.omega < 0.0) {
-            xv.push_back(randomUnit(0.0,1.0)*width);
-            xv.push_back(randomUnit(0.0,1.0)*width);
-        } else {
-            xv.push_back(ipd.d/2.0);
-            xv.push_back(ipd.d/2.0 + ipd.omega*(ipd.d+ipd.s)/(1.0+ipd.omega));
-        }
-    }
+       if(ipd.omega < 0.0) {
+       xv.push_back(randomUnit(0.0,1.0)*width);
+       xv.push_back(randomUnit(0.0,1.0)*width);
+       } else {
+       xv.push_back(ipd.d/2.0);
+       xv.push_back(ipd.d/2.0 + ipd.omega*(ipd.d+ipd.s)/(1.0+ipd.omega));
+       }
+       }
+     */ // OLD
+
+    // calculate brick centers
+    std::vector<double> xv, yv, dv, tv, Sv, Sh, Dv, Dh; // UNTESTED (HERE)
+    Geometry::getBricks(ipd,xv,yv,dv,tv,Sv,Sh,Dv,Dh); // UNTESTED (HERE)
 
     // fill geometry with bricks ("foreground")
-    fillGeometryWithRectangles(s_ver,D_ver,Sv,Dv,xv,yv,dv,tv,res_width,res_hight,width,0.0);
-    fillGeometryWithRectangles(s_hor,D_hor,Sh,Dh,xv,yv,dv,tv,res_width,res_hight,width,1.0);
+    //fillGeometryWithRectangles(s_ver,D_ver,Sv,Dv,xv,yv,dv,tv,res_width,res_hight,width,0.0); // OLD
+    //fillGeometryWithRectangles(s_hor,D_hor,Sh,Dh,xv,yv,dv,tv,res_width,res_hight,width,1.0); // OLD
+    fillGeometryWithRectanglesVer(s_ver,D_ver,Sv,Dv,xv,yv,dv,tv,width,height); // UNTESTED (HERE)
+    fillGeometryWithRectanglesHor(s_hor,D_hor,Sh,Dh,xv,yv,dv,tv,width,height); // UNTESTED (HERE)
     fillGeometryWithRectanglesNodes(s_nodes,Sh,xv,yv,dv,tv,ipd.width,ipd.height);
+
     insertRow(s_nodes,0,ipd.S_out);
     s_nodes.conservativeResize(s_nodes.rows()+1, s_nodes.cols());
     s_nodes.row(s_nodes.rows()-1) = ipd.S_out*vec::Ones(s_nodes.row(s_nodes.rows()-1).cols());
