@@ -17,11 +17,13 @@ class Geometry
         void fillGeometryWithRectanglesHor(mat &A_mat, mat &B_mat, std::vector<double> A_sca, std::vector<double> B_sca, std::vector<double> xv, std::vector<double> yv, std::vector<double> dv, std::vector<double> tv, double width, double height);
         void fillGeometryWithRectanglesVer(mat &A_mat, mat &B_mat, std::vector<double> A_sca, std::vector<double> B_sca, std::vector<double> xv, std::vector<double> yv, std::vector<double> dv, std::vector<double> tv, double width, double height);
         void brickAndMortar(mat &s_hor, mat &s_ver, mat &s_nodes, mat &D_hor, mat &D_ver, double &height, double &width, InputData ipd, std::string &name);
+        void brickAndMortarEnglishBond(mat &s_hor, mat &s_ver, mat &s_nodes, mat &D_hor, mat &D_ver, double &height, double &width, InputData ipd, std::string &name);
+        void brickAndMortarFlemishBond(mat &s_hor, mat &s_ver, mat &s_nodes, mat &D_hor, mat &D_ver, double &height, double &width, InputData ipd, std::string &name);
         void custom_made(mat &s_hor, mat &s_ver, mat &s_nodes, mat &D_hor, mat &D_ver, double &height, double &width, InputData ipd, std::string &name);
         void brickAndMortarDualLinear(mat &s_hor, mat &s_ver, mat &s_nodes, mat &D_hor, mat &D_ver, double &height, double &width, InputData ipd, std::string &name);
         void getGeometry(mat &s_hor, mat &s_ver, mat &s_nodes, mat &D_hor, mat &D_ver, InputData &ipd);
         void checkInputForBrickAndMortar(InputData ipd);
-        void getBricks(InputData ipd, std::vector<double> &xv, std::vector<double> &yv, std::vector<double> &dv, std::vector<double> &tv, std::vector<double> &Sv, std::vector<double> &Sh, std::vector<double> &Dv, std::vector<double> &Dh);
+        void getBricks(InputData ipd, std::vector<double> &xv, std::vector<double> &yv, std::vector<double> &dv, std::vector<double> &tv, std::vector<double> &Sv, std::vector<double> &Sh, std::vector<double> &Dv, std::vector<double> &Dh, int model, int K);
 };
 
 /**
@@ -262,7 +264,7 @@ void Geometry::checkInputForBrickAndMortar(InputData ipd) {
     assert(("number of rows in mesh cannot be negative" && ipd.R >= 0));
 }
 
-void Geometry::getBricks(InputData ipd, std::vector<double> &xv, std::vector<double> &yv, std::vector<double> &dv, std::vector<double> &tv, std::vector<double> &Sv, std::vector<double> &Sh, std::vector<double> &Dv, std::vector<double> &Dh) {
+void Geometry::getBricks(InputData ipd, std::vector<double> &xv, std::vector<double> &yv, std::vector<double> &dv, std::vector<double> &tv, std::vector<double> &Sv, std::vector<double> &Sh, std::vector<double> &Dv, std::vector<double> &Dh, int model, int K = 2) {
     xv.resize(0);
     yv.resize(0);
     dv.resize(0);
@@ -271,25 +273,102 @@ void Geometry::getBricks(InputData ipd, std::vector<double> &xv, std::vector<dou
     Sh.resize(0);
     Dv.resize(0);
     Dh.resize(0);
-    double width = ipd.d + ipd.s;
-    for(int n = 0; n < ipd.N; n += 2) {
-        for(int i = 0; i < 2; i++) {
-            dv.push_back(ipd.d);
+
+    if(model == 0) { // Stretcher bond (Brick and Mortar original)
+        double width = ipd.d + ipd.s;
+        for(int n = 0; n < ipd.N; n += 2) {
+            for(int i = 0; i < 2; i++) {
+                dv.push_back(ipd.d);
+                tv.push_back(ipd.t);
+                Sv.push_back(ipd.S_bv);
+                Sh.push_back(ipd.S_bh);
+                Dv.push_back(ipd.D_bv);
+                Dh.push_back(ipd.D_bh);
+            }
+            yv.push_back(ipd.t/2.0 + n*(ipd.t+ipd.g));
+            yv.push_back(ipd.t/2.0 + (n+1)*(ipd.t+ipd.g));
+
+            if(ipd.omega < 0.0) {
+                xv.push_back(randomUnit(0.0,1.0)*width);
+                xv.push_back(randomUnit(0.0,1.0)*width);
+            } else {
+                xv.push_back(ipd.d/2.0);
+                xv.push_back(ipd.d/2.0 + ipd.omega*width/(1.0+ipd.omega));
+            }
+        }
+    } else if(model == 2) { // English Bond
+        double width = ipd.d + ipd.s;
+        for(int n = 0; n < ipd.N; n += 2) {
+
             tv.push_back(ipd.t);
             Sv.push_back(ipd.S_bv);
             Sh.push_back(ipd.S_bh);
             Dv.push_back(ipd.D_bv);
             Dh.push_back(ipd.D_bh);
-        }
-        yv.push_back(ipd.t/2.0 + n*(ipd.t+ipd.g));
-        yv.push_back(ipd.t/2.0 + (n+1)*(ipd.t+ipd.g));
 
-        if(ipd.omega < 0.0) {
-            xv.push_back(randomUnit(0.0,1.0)*width);
-            xv.push_back(randomUnit(0.0,1.0)*width);
-        } else {
-            xv.push_back(ipd.d/2.0);
-            xv.push_back(ipd.d/2.0 + ipd.omega*(ipd.d+ipd.s)/(1.0+ipd.omega));
+            tv.push_back(ipd.t);
+            Sv.push_back(ipd.S_comp_bv);
+            Sh.push_back(ipd.S_comp_bh);
+            Dv.push_back(ipd.D_comp_bv);
+            Dh.push_back(ipd.D_comp_bh);
+
+            tv.push_back(ipd.t);
+            Sv.push_back(ipd.S_comp_bv);
+            Sh.push_back(ipd.S_comp_bh);
+            Dv.push_back(ipd.D_comp_bv);
+            Dh.push_back(ipd.D_comp_bh);
+
+            dv.push_back(ipd.d);
+            dv.push_back((ipd.d-ipd.s)/2.0);
+            dv.push_back((ipd.d-ipd.s)/2.0);
+
+            yv.push_back(ipd.t/2.0 + n*(ipd.t+ipd.g));
+            yv.push_back(ipd.t/2.0 + (n+1)*(ipd.t+ipd.g));
+            yv.push_back(ipd.t/2.0 + (n+1)*(ipd.t+ipd.g));
+
+            if(ipd.omega < 0.0) {
+                xv.push_back(randomUnit(0.0,1.0)*width);
+                xv.push_back(randomUnit(0.0,1.0)*width);
+            } else {
+                xv.push_back(ipd.d/2.0);
+                xv.push_back(ipd.d/2.0 + ipd.omega*width/(1.0+ipd.omega));
+            }
+            xv.push_back(xv.back()+dv.back()+ipd.s);
+        }
+    } else if(model == 3) { // K=2 => Flemish Bond, K=3 => Monk bond, K = 4 => Sussex bond
+        //int K = 3; // total number of bricks in each row (including complmentary one)
+        double width = ipd.d*double(K-1) + double(K)*ipd.s + ipd.d_comp;
+        for(int n = 0; n < ipd.N; n += 2) {
+            for(int m = 0; m < 2; m++) { // for line 'n' and line 'n+1'
+                for(int k = 0; k < K-1; k++) { // bricks
+                    dv.push_back(ipd.d);
+                    tv.push_back(ipd.t);
+                    Sv.push_back(ipd.S_bv);
+                    Sh.push_back(ipd.S_bh);
+                    Dv.push_back(ipd.D_bv);
+                    Dh.push_back(ipd.D_bh);
+                    yv.push_back(ipd.t/2.0 + (n+m)*(ipd.t+ipd.g));
+                    if(ipd.omega < 0.0 && k == 0) {
+                        xv.push_back(randomUnit(0.0,1.0)*width);
+                    } else if(ipd.omega >= 0.0 && k == 0 && m == 0) {
+                        xv.push_back(0.0);
+                    } else if(ipd.omega >= 0.0 && k == 0 && m == 1) {
+                        //xv.push_back(0.0 + (width - (ipd.d/2.0 + ipd.s)*double(K-1) - ipd.d_comp/2.0) * 2.0*ipd.omega/(1.0+ipd.omega));
+                        xv.push_back(0.0 + (width - 2.0*ipd.d_comp - 2.0*ipd.s - 2.0*double(K-1)*(ipd.d+ipd.s))/2.0 * 2.0*ipd.omega/(1.0+ipd.omega));
+                    } else {
+                        xv.push_back(xv.back()+ipd.d+ipd.s);
+                    }
+                }
+                // complementary brick
+                dv.push_back(ipd.d_comp);
+                tv.push_back(ipd.t);
+                Sv.push_back(ipd.S_comp_bv);
+                Sh.push_back(ipd.S_comp_bh);
+                Dv.push_back(ipd.D_comp_bv);
+                Dh.push_back(ipd.D_comp_bh);
+                yv.push_back(ipd.t/2.0 + (n+m)*(ipd.t+ipd.g));
+                xv.push_back(xv.back()+ipd.d/2.0+ipd.d_comp/2.0+ipd.s);
+            }
         }
     }
 }
@@ -368,7 +447,84 @@ void Geometry::brickAndMortar(mat &s_hor, mat &s_ver, mat &s_nodes, mat &D_hor, 
 
     // calculate brick centers
     std::vector<double> xv, yv, dv, tv, Sv, Sh, Dv, Dh;
-    Geometry::getBricks(ipd,xv,yv,dv,tv,Sv,Sh,Dv,Dh);
+    Geometry::getBricks(ipd,xv,yv,dv,tv,Sv,Sh,Dv,Dh,0);
+
+    fillGeometryWithRectanglesVer(s_ver,D_ver,Sv,Dv,xv,yv,dv,tv,width,height);
+    fillGeometryWithRectanglesHor(s_hor,D_hor,Sh,Dh,xv,yv,dv,tv,width,height);
+    fillGeometryWithRectanglesNodes(s_nodes,Sh,xv,yv,dv,tv,width,height);
+    insertRow(s_nodes,0,ipd.S_out);
+    s_nodes.conservativeResize(s_nodes.rows()+1, s_nodes.cols());
+    s_nodes.row(s_nodes.rows()-1) = ipd.S_out*vec::Ones(s_nodes.row(s_nodes.rows()-1).cols());
+}
+
+/**
+ * @brief Get solubility and diffusion coefficient matrices for a brick and mortar (English bond style) system
+ * @param s_hor Matrix of horizontal solubilities (will be set)
+ * @param s_ver Matrix of vertical solubilities (will be set)
+ * @param D_hor Matrix of horizontal diffusion coefficients (will be set)
+ * @param D_ver Matrix of vertical diffusion coefficients (will be set)
+ * @param height Height of system (will be set)
+ * @param width Width of system (will be set)
+ * @param ipd Input data for the system
+ * @param name Name of system (will be set)
+ * @note All input except 'ipd' is set using this function. All input data is supplied in 'ipd'.
+ */
+void Geometry::brickAndMortarEnglishBond(mat &s_hor, mat &s_ver, mat &s_nodes, mat &D_hor, mat &D_ver, double &height, double &width, InputData ipd, std::string &name) {
+    Geometry::checkInputForBrickAndMortar(ipd);
+
+    name = "Brick and Mortar English Bond";
+    width = ipd.d + ipd.s;
+    height = double( ipd.N )*ipd.t + double( ipd.N-1 )*ipd.g;
+
+    // fill geometry with mortar ("background")
+    s_ver = mat::Ones(ipd.R+1,ipd.C)*ipd.S_mv;
+    s_hor = mat::Ones(ipd.R,ipd.C)*ipd.S_mh;
+    s_nodes = mat::Ones(ipd.R,ipd.C)*ipd.S_mh;
+    D_ver = mat::Ones(ipd.R+1,ipd.C)*ipd.D_mv;
+    D_hor = mat::Ones(ipd.R,ipd.C)*ipd.D_mh;
+
+    // calculate brick centers
+    std::vector<double> xv, yv, dv, tv, Sv, Sh, Dv, Dh;
+    Geometry::getBricks(ipd,xv,yv,dv,tv,Sv,Sh,Dv,Dh,2);
+
+    fillGeometryWithRectanglesVer(s_ver,D_ver,Sv,Dv,xv,yv,dv,tv,width,height);
+    fillGeometryWithRectanglesHor(s_hor,D_hor,Sh,Dh,xv,yv,dv,tv,width,height);
+    fillGeometryWithRectanglesNodes(s_nodes,Sh,xv,yv,dv,tv,width,height);
+    insertRow(s_nodes,0,ipd.S_out);
+    s_nodes.conservativeResize(s_nodes.rows()+1, s_nodes.cols());
+    s_nodes.row(s_nodes.rows()-1) = ipd.S_out*vec::Ones(s_nodes.row(s_nodes.rows()-1).cols());
+}
+
+/**
+ * @brief Get solubility and diffusion coefficient matrices for a brick and mortar (Flemish bond style) system
+ * @param s_hor Matrix of horizontal solubilities (will be set)
+ * @param s_ver Matrix of vertical solubilities (will be set)
+ * @param D_hor Matrix of horizontal diffusion coefficients (will be set)
+ * @param D_ver Matrix of vertical diffusion coefficients (will be set)
+ * @param height Height of system (will be set)
+ * @param width Width of system (will be set)
+ * @param ipd Input data for the system
+ * @param name Name of system (will be set)
+ * @note All input except 'ipd' is set using this function. All input data is supplied in 'ipd'.
+ */
+void Geometry::brickAndMortarFlemishBond(mat &s_hor, mat &s_ver, mat &s_nodes, mat &D_hor, mat &D_ver, double &height, double &width, InputData ipd, std::string &name) {
+    Geometry::checkInputForBrickAndMortar(ipd);
+
+    name = "Brick and Mortar Flemish Bond";
+    int K = 3;
+    width = double(K-1)*ipd.d + double(K)*ipd.s + ipd.d_comp;
+    height = double( ipd.N )*ipd.t + double( ipd.N-1 )*ipd.g;
+
+    // fill geometry with mortar ("background")
+    s_ver = mat::Ones(ipd.R+1,ipd.C)*ipd.S_mv;
+    s_hor = mat::Ones(ipd.R,ipd.C)*ipd.S_mh;
+    s_nodes = mat::Ones(ipd.R,ipd.C)*ipd.S_mh;
+    D_ver = mat::Ones(ipd.R+1,ipd.C)*ipd.D_mv;
+    D_hor = mat::Ones(ipd.R,ipd.C)*ipd.D_mh;
+
+    // calculate brick centers
+    std::vector<double> xv, yv, dv, tv, Sv, Sh, Dv, Dh;
+    Geometry::getBricks(ipd,xv,yv,dv,tv,Sv,Sh,Dv,Dh,3,K);
 
     fillGeometryWithRectanglesVer(s_ver,D_ver,Sv,Dv,xv,yv,dv,tv,width,height);
     fillGeometryWithRectanglesHor(s_hor,D_hor,Sh,Dh,xv,yv,dv,tv,width,height);
@@ -497,7 +653,7 @@ void Geometry::brickAndMortarDualLinear(mat &s_hor, mat &s_ver, mat &s_nodes, ma
 
     // calculate brick centers
     std::vector<double> xv, yv, dv, tv, Sv, Sh, Dv, Dh; // UNTESTED (HERE)
-    Geometry::getBricks(ipd,xv,yv,dv,tv,Sv,Sh,Dv,Dh); // UNTESTED (HERE)
+    Geometry::getBricks(ipd,xv,yv,dv,tv,Sv,Sh,Dv,Dh,0); // UNTESTED (HERE)
 
     // fill geometry with bricks ("foreground")
     //fillGeometryWithRectangles(s_ver,D_ver,Sv,Dv,xv,yv,dv,tv,res_width,res_hight,width,0.0); // OLD
@@ -534,8 +690,20 @@ void Geometry::getGeometry(mat &s_hor, mat &s_ver, mat &s_nodes, mat &D_hor, mat
         appendDataToFile(ipd.output_file,"model external\n");
     } else {
         std::string name = "";
-        if(ipd.model_nbr == 2) {
+        if(ipd.model_nbr == 4) {
             custom_made(s_hor,s_ver,s_nodes,D_hor,D_ver,ipd.height,ipd.width,ipd,name);
+        } else if(ipd.model_nbr == 3) {
+            brickAndMortarFlemishBond(s_hor,s_ver,s_nodes,D_hor,D_ver,ipd.height,ipd.width,ipd,name);
+            appendDataToFile(ipd.output_file,"K_{M_ver/out} "+to_string_precision(ipd.S_mv/ipd.S_out) +"\n");
+            appendDataToFile(ipd.output_file,"K_{B_ver/out} "+to_string_precision(ipd.S_bv/ipd.S_out) +"\n");
+            appendDataToFile(ipd.output_file,"K_{M_ver/B_ver} "+to_string_precision(ipd.S_mv/ipd.S_bv) +"\n");
+            appendDataToFile(ipd.output_file,"K_{M_hor/B_hor} "+to_string_precision(ipd.S_mh/ipd.S_bh) +"\n");
+        } else if(ipd.model_nbr == 2) {
+            brickAndMortarEnglishBond(s_hor,s_ver,s_nodes,D_hor,D_ver,ipd.height,ipd.width,ipd,name);
+            appendDataToFile(ipd.output_file,"K_{M_ver/out} "+to_string_precision(ipd.S_mv/ipd.S_out) +"\n");
+            appendDataToFile(ipd.output_file,"K_{B_ver/out} "+to_string_precision(ipd.S_bv/ipd.S_out) +"\n");
+            appendDataToFile(ipd.output_file,"K_{M_ver/B_ver} "+to_string_precision(ipd.S_mv/ipd.S_bv) +"\n");
+            appendDataToFile(ipd.output_file,"K_{M_hor/B_hor} "+to_string_precision(ipd.S_mh/ipd.S_bh) +"\n");
         } else if(ipd.model_nbr == 1) {
             brickAndMortarDualLinear(s_hor,s_ver,s_nodes,D_hor,D_ver,ipd.height,ipd.width,ipd,name);
             appendDataToFile(ipd.output_file,"K_{M_ver/out} "+to_string_precision(ipd.S_mv/ipd.S_out) +"\n");

@@ -1,5 +1,6 @@
 model_nbr     0     # model number, 0 gives Brick and Mortar
 d             5.0   # width of bricks
+d_comp        2.0   # width of complementary bricks
 s             0.1   # horizontal spacing between bricks
 g             0.1   # vertical spacing between bricks
 t             1.0   # brick thickness

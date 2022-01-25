@@ -14,7 +14,7 @@ class InputData {
 
     public:
         int R, C, N, seed, model_nbr;
-        double d, s, g, t, omega, S_mv, S_mh, S_bv, S_bh, S_mtv, S_mth, D_mtv, D_mth, D_mv, D_mh, D_bv, D_bh, DLambda, z_break, height, width, c_out, S_out, evap_time, evap_left; // DLambda superfluous?
+        double d, d_comp, s, g, t, omega, S_mv, S_mh, S_bv, S_bh, S_comp_bv, S_comp_bh, S_mtv, S_mth, D_mtv, D_mth, D_mv, D_mh, D_bv, D_bh, D_comp_bv, D_comp_bh, DLambda, z_break, height, width, c_out, S_out, evap_time, evap_left; // DLambda superfluous?
         bool load_external; //!< Load external input?
         std::string input_folder, output_folder, output_file;
         const double inf = std::numeric_limits<double>::infinity();
@@ -40,6 +40,7 @@ class InputData {
             model_nbr = -1;
 
             d = -0.1;
+            d_comp = -0.1;
             s = -0.1;
             g = -0.1;
             t = -0.1;
@@ -48,6 +49,8 @@ class InputData {
             S_mh = -0.1;
             S_bv = -0.1;
             S_bh = -0.1;
+            S_comp_bv = -0.1;
+            S_comp_bh = -0.1;
             S_mtv = -0.1;
             S_mth = -0.1;
             D_mtv = -0.1;
@@ -56,6 +59,8 @@ class InputData {
             D_mh = -0.1;
             D_bv = -0.1;
             D_bh = -0.1;
+            D_comp_bv = -0.1;
+            D_comp_bh = -0.1;
             DLambda = -0.1;
             z_break = -0.1;
             height = -0.1;
@@ -112,6 +117,8 @@ class InputData {
                         model_nbr = std::stoi(result.at(1));
                     if (result.at(0).compare("d") == 0)
                         d = std::stod(result.at(1));
+                    if (result.at(0).compare("d_comp") == 0)
+                        d_comp = std::stod(result.at(1));
                     if (result.at(0).compare("s") == 0)
                         s = std::stod(result.at(1));
                     if (result.at(0).compare("g") == 0)
@@ -128,6 +135,10 @@ class InputData {
                         S_bv = std::stod(result.at(1));
                     if (result.at(0).compare("S_bh") == 0)
                         S_bh = std::stod(result.at(1));
+                    if (result.at(0).compare("S_comp_bv") == 0)
+                        S_comp_bv = std::stod(result.at(1));
+                    if (result.at(0).compare("S_comp_bh") == 0)
+                        S_comp_bh = std::stod(result.at(1));
                     if (result.at(0).compare("S_mtv") == 0)
                         S_mtv = std::stod(result.at(1));
                     if (result.at(0).compare("S_mth") == 0)
@@ -144,6 +155,10 @@ class InputData {
                         D_bv = std::stod(result.at(1));
                     if (result.at(0).compare("D_bh") == 0)
                         D_bh = std::stod(result.at(1));
+                    if (result.at(0).compare("D_comp_bv") == 0)
+                        D_comp_bv = std::stod(result.at(1));
+                    if (result.at(0).compare("D_comp_bh") == 0)
+                        D_comp_bh = std::stod(result.at(1));
                     if (result.at(0).compare("z_break") == 0)
                         z_break = std::stod(result.at(1));
                     if (result.at(0).compare("height") == 0)
@@ -265,6 +280,7 @@ class InputData {
             if (seed >= 0) appendDataToFile(filename,"seed "+to_string_precision(seed)+"\n");
             if (model_nbr >= 0) appendDataToFile(filename,"model_nbr "+to_string_precision(model_nbr)+"\n");
             if (d >= -0.05) appendDataToFile(filename,"d "+to_string_precision(d)+"\n");
+            if (d_comp >= -0.05) appendDataToFile(filename,"d_comp "+to_string_precision(d_comp)+"\n");
             if (s >= -0.05) appendDataToFile(filename,"s "+to_string_precision(s)+"\n");
             if (g >= -0.05) appendDataToFile(filename,"g "+to_string_precision(g)+"\n");
             if (t >= -0.05) appendDataToFile(filename,"t "+to_string_precision(t)+"\n");
@@ -273,6 +289,8 @@ class InputData {
             if (S_mh >= -0.05) appendDataToFile(filename,"S_mh "+to_string_precision(S_mh)+"\n");
             if (S_bv >= -0.05) appendDataToFile(filename,"S_bv "+to_string_precision(S_bv)+"\n");
             if (S_bh >= -0.05) appendDataToFile(filename,"S_bh "+to_string_precision(S_bh)+"\n");
+            if (S_comp_bv >= -0.05) appendDataToFile(filename,"S_comp_bv "+to_string_precision(S_comp_bv)+"\n");
+            if (S_comp_bh >= -0.05) appendDataToFile(filename,"S_comp_bh "+to_string_precision(S_comp_bh)+"\n");
             if (S_mtv >= -0.05) appendDataToFile(filename,"S_mtv "+to_string_precision(S_mtv)+"\n");
             if (S_mth >= -0.05) appendDataToFile(filename,"S_mth "+to_string_precision(S_mth)+"\n");
             if (D_mtv >= -0.05) appendDataToFile(filename,"D_mtv "+to_string_precision(D_mtv)+"\n");
@@ -281,6 +299,8 @@ class InputData {
             if (D_mh >= -0.05) appendDataToFile(filename,"D_mh "+to_string_precision(D_mh)+"\n");
             if (D_bv >= -0.05) appendDataToFile(filename,"D_bv "+to_string_precision(D_bv)+"\n");
             if (D_bh >= -0.05) appendDataToFile(filename,"D_bh "+to_string_precision(D_bh)+"\n");
+            if (D_comp_bv >= -0.05) appendDataToFile(filename,"D_comp_bv "+to_string_precision(D_comp_bv)+"\n");
+            if (D_comp_bh >= -0.05) appendDataToFile(filename,"D_comp_bh "+to_string_precision(D_comp_bh)+"\n");
             if (z_break >= -0.05) appendDataToFile(filename,"z_break "+to_string_precision(z_break)+"\n");
             if (height >= -0.05) appendDataToFile(filename,"height "+to_string_precision(height)+"\n");
             if (width >= -0.05) appendDataToFile(filename,"width "+to_string_precision(width)+"\n");

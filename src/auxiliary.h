@@ -85,11 +85,12 @@ std::vector<bool> reduceMatrix(mat &inm, vec inv) {
  * @param Lx periodic length
  */
 double PBC_1D(const double x, const double Lx) {
-    if(x > Lx/2.0)
-        return (x - Lx);
-    if(x < -Lx/2.0)
-        return (x + Lx);
-    return x;
+    double x_out = x;
+    while(x_out > Lx/2.0)
+        x_out -= Lx;
+    while(x_out < -Lx/2.0)
+        x_out += Lx;
+    return x_out;
 }
 
 std::string to_string_precision(const int val) {
