@@ -296,7 +296,7 @@ void Geometry::getBricks(InputData ipd, std::vector<double> &xv, std::vector<dou
                 xv.push_back(ipd.d/2.0 + ipd.omega*width/(1.0+ipd.omega));
             }
         }
-    } else if(model == 2) { // English Bond
+    } else if(model == 2) { // English Bond (Blockförband)
         double width = ipd.d + ipd.s;
         for(int n = 0; n < ipd.N; n += 2) {
 
@@ -335,7 +335,7 @@ void Geometry::getBricks(InputData ipd, std::vector<double> &xv, std::vector<dou
             }
             xv.push_back(xv.back()+dv.back()+ipd.s);
         }
-    } else if(model == 3) { // K=2 => Flemish Bond, K=3 => Monk bond, K = 4 => Sussex bond
+    } else if(model == 3) { // K=2 => Flemish Bond (Vendiskt (eller Götiskt) förband), K=3 => Monk bond (Munkförband), K = 4 => Sussex bond
         //int K = 3; // total number of bricks in each row (including complmentary one)
         double width = ipd.d*double(K-1) + double(K)*ipd.s + ipd.d_comp;
         for(int n = 0; n < ipd.N; n += 2) {
