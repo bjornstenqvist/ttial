@@ -138,6 +138,30 @@ bool compatibleSizes(const mat &Av, const mat &Ah, const mat &Bv, const mat &Bh)
 }
 
 /**
+ * @brief Load vector from file.
+ * @note Assumes column-vector
+ */
+vec loadVector(const std::string filename) {
+    std::string line;
+    std::ifstream myfile (filename);
+
+    std::vector<double> vec_v(0);
+    if (myfile.is_open())
+    {
+        while ( getline (myfile,line) )
+            vec_v.push_back(std::stod(line));
+        myfile.close();
+    } else {
+        std::cout << "Could not open file '" << filename << "'" << std::endl;
+    }
+
+    vec vec0 = vec::Zero(vec_v.size());
+    for(unsigned int i = 0; i < vec_v.size(); i++)
+        vec0(i) = vec_v.at(i);
+    return vec0;
+}
+
+/**
  * @brief Load matrix from file.
  * @note Assumes input is exactly of the form N x M, i.e. each colum has same size, and each row has same size.
  */
@@ -161,6 +185,8 @@ mat loadMatrix(const std::string filename) {
             mat_v.push_back(result_d);
         }
         myfile.close();
+    } else {
+        std::cout << "Could not open file '" << filename << "'" << std::endl;
     } 
 
     mat mat0 = mat::Zero(mat_v.size(),mat_v.at(0).size());
@@ -258,6 +284,13 @@ mat splitInverse(const mat &mat0) {
     mat_inverse.block(sr,sc,R-sr,C-sc) = Si;
 
     return mat_inverse;
+}
+
+void writeVectorToFile(const std::string filename, const vec &in) {
+    std::ofstream file(filename);
+    if (file.is_open())
+        for(int r = 0; r < in.size(); r++)
+            file << in(r) << std::endl;
 }
 
 void writeMatrixToFile(const std::string filename, const mat &in) {
@@ -396,7 +429,7 @@ void calcProp(mat &varpi_hor, mat &varpi_ver, mat &s_hor, mat &s_ver, mat &V_nod
  * @param max_count maximum number of iterations before breaking
  * @todo Fix reference
  */
-vec conjugateGradientMethod(mat &A, vec x_0, vec &b, double &error, double max_error, int max_count, bool display, int sample) {
+vec conjugateGradientMethod(mat &A, vec x_0, vec &b, double &error, double max_error, int max_count, bool display, int sample, std::string output_file) {
     double summed_difference = (A-A.transpose()).cwiseAbs().sum();
     double all_elements = A.cwiseAbs().sum();
     if(summed_difference/all_elements > 1e-6)
@@ -420,16 +453,17 @@ vec conjugateGradientMethod(mat &A, vec x_0, vec &b, double &error, double max_e
         vec Apk = A*p_k;
         double alpha_k = rktrk/double(p_k.transpose()*Apk);
         vec r_k1 = r_k - alpha_k*Apk;
+        vec x_k1 = x_k + alpha_k*p_k;
         error = r_k1.array().square().sum();
         if(error < max_error) {
             pb.end_of_process();
-            std::cout << "Found accurate potential after " << k << " iterations." << std::endl;
-            return ( x_k + alpha_k*p_k );
+            appendDataToFile(output_file,"found accurate potential after "+to_string_precision(k)+" iterations.\n");
+            return x_k1;
         }
 
         double beta_k = double(r_k1.transpose()*r_k1)/rktrk;
         p_k = r_k1 + beta_k*p_k; // update p_k
-        x_k = x_k + alpha_k*p_k; // update x_k
+        x_k = x_k1; // update x_k
         r_k = r_k1; // update r_k
         k++;
 
@@ -438,6 +472,6 @@ vec conjugateGradientMethod(mat &A, vec x_0, vec &b, double &error, double max_e
             pb.display();
     }
     pb.end_of_process();
-    std::cerr << "Warning! Did not find accurate enough potential after " << k << " iterations." << std::endl;
+    appendDataToFile(output_file,"Warning! Did not find accurate enough potential after "+to_string_precision(k)+" iterations.\n");
     return x_k;
 }

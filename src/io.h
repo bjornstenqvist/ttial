@@ -16,7 +16,7 @@ class InputData {
         int R, C, N, seed, model_nbr, max_iterations;
         double d, d_comp, s, g, t, omega, S_mv, S_mh, S_bv, S_bh, S_comp_bv, S_comp_bh, S_mtv, S_mth, D_mtv, D_mth, D_mv, D_mh, D_bv, D_bh, D_comp_bv, D_comp_bh, DLambda, z_break, height, width, c_out, S_out, evap_time, evap_left, max_error; // DLambda superfluous?
         bool load_external; //!< Load external input?
-        std::string input_folder, output_folder, output_file;
+        std::string input_folder, output_folder, output_file, init_guess;
         const double inf = std::numeric_limits<double>::infinity();
 
         std::vector<double> recX, recY, recW, recH, recVD, recVS, recHD, recHS;
@@ -78,6 +78,7 @@ class InputData {
             input_folder = "";
             output_folder = "";
             output_file = "output.txt";
+            init_guess = "";
 
             time_steps = -1;
             sample = -1;
@@ -178,6 +179,8 @@ class InputData {
                             load_external = true;
                     if (result.at(0).compare("input_folder") == 0)
                         input_folder = result.at(1)+"/";
+                    if (result.at(0).compare("init_guess") == 0)
+                        init_guess = result.at(1);
                     if (result.at(0).compare("output_folder") == 0)
                         output_folder = result.at(1)+"/";
                     if (result.at(0).compare("output_file") == 0)
@@ -348,6 +351,7 @@ class InputData {
             appendDataToFile(filename,"input_folder "+input_folder+"\n");
             appendDataToFile(filename,"output_folder "+output_folder+"\n");
             appendDataToFile(filename,"output_file "+output_file+"\n");
+            appendDataToFile(filename,"init_guess "+init_guess+"\n");
         }
 
         /**

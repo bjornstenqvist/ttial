@@ -10,7 +10,7 @@
  * @param DeltaV potential difference over the entire mesh of vertical resistors
  * @param output_file name of output-file
  */
-void calcNodeAbsActivities(mat &res_hor, mat &res_ver, double DeltaV, double dy, std::string output_folder, std::string output_file, int max_iterations, double max_error, bool display, int sample) {
+void calcNodeAbsActivities(mat &res_hor, mat &res_ver, double DeltaV, double dy, std::string output_folder, std::string init_guess, std::string output_file, int max_iterations, double max_error, bool display, int sample) {
     // initialize nodes
     std::vector<Node> nodes;
     int nbr_of_nodes = res_hor.rows()*res_hor.cols();
@@ -31,7 +31,15 @@ void calcNodeAbsActivities(mat &res_hor, mat &res_ver, double DeltaV, double dy,
     vec V;
     if(max_iterations > 0) {
         double error = 2.0*max_error;
-        V = conjugateGradientMethod(Rinv,I*0.0,I,error,max_error,max_iterations,display,sample);
+        vec V_guess = loadVector(init_guess);
+        if(V_guess.size() == 0) {
+            V_guess = I*0.0;
+            appendDataToFile(output_file,"initial guess in Conjugate Gradient Method is a zero-vector\n");
+        } else {
+            appendDataToFile(output_file,"initial guess in Conjugate Gradient Method has been loaded from file: "+init_guess+"\n");
+        }
+        V = conjugateGradientMethod(Rinv,V_guess,I,error,max_error,max_iterations,display,sample,output_file);
+        writeMatrixToFile(output_folder+"V_vec_last_iteration.txt",V);
         appendDataToFile(output_file,"method conjugate gradient (numerical), error "+to_string_precision(error)+"\n");
     } else {
         //mat R = Rinv.inverse();                             // more effective for small systems (I think...)
@@ -70,7 +78,7 @@ void steadystate(InputData ipd, mat varpi_hor, mat varpi_ver, mat s_hor, mat s_v
     writeMatrixToFile(ipd.output_folder+"res_ver.txt",res_ver);
 
     double dy = ipd.height/double(ipd.R+1);
-    calcNodeAbsActivities(res_hor,res_ver,ipd.DLambda,dy,ipd.output_folder,ipd.output_file,ipd.max_iterations,ipd.max_error,ipd.display,ipd.sample); // perform main calculations, i.e. get potential in nodes
+    calcNodeAbsActivities(res_hor,res_ver,ipd.DLambda,dy,ipd.output_folder,ipd.init_guess,ipd.output_file,ipd.max_iterations,ipd.max_error,ipd.display,ipd.sample); // perform main calculations, i.e. get potential in nodes
     // generate output and end program
     mat Lambda_mat = loadMatrix(ipd.output_folder+"V_matrix.txt"); // load output from 'calcNodeAbsActivities' which is written to file
     calcProp(varpi_hor,varpi_ver,s_hor,s_ver,Lambda_mat,ipd.height,ipd.width,ipd.c_out,ipd.S_out,ipd.output_folder,ipd.output_file); // calculate concentrations and fluxes
