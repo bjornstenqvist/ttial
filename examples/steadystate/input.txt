@@ -19,3 +19,4 @@ D_bh          1.0   # brick diffusion coefficient (horizontal)
 seed          1     # seed, negative gives random
 Nc            51    # number of columns of nodes in mesh
 Nr            54    # number of rows of nodes in mesh
+output_folder Output # folder for output

@@ -1,11 +1,11 @@
 #pragma once
-#include "auxiliary.h"
 #include <iostream>
 #include <fstream>
 #include <iomanip> 
 #include <vector>
 #include <sstream>
 #include <cmath>
+#include "auxiliary.h"
 
 /**
  * @brief A class for input data
@@ -13,8 +13,8 @@
 class InputData {
 
     public:
-        int R, C, N, seed, model_nbr;
-        double d, d_comp, s, g, t, omega, S_mv, S_mh, S_bv, S_bh, S_comp_bv, S_comp_bh, S_mtv, S_mth, D_mtv, D_mth, D_mv, D_mh, D_bv, D_bh, D_comp_bv, D_comp_bh, DLambda, z_break, height, width, c_out, S_out, evap_time, evap_left; // DLambda superfluous?
+        int R, C, N, seed, model_nbr, max_iterations;
+        double d, d_comp, s, g, t, omega, S_mv, S_mh, S_bv, S_bh, S_comp_bv, S_comp_bh, S_mtv, S_mth, D_mtv, D_mth, D_mv, D_mh, D_bv, D_bh, D_comp_bv, D_comp_bh, DLambda, z_break, height, width, c_out, S_out, evap_time, evap_left, max_error; // DLambda superfluous?
         bool load_external; //!< Load external input?
         std::string input_folder, output_folder, output_file;
         const double inf = std::numeric_limits<double>::infinity();
@@ -38,6 +38,7 @@ class InputData {
             N = -1;
             seed = -1; // random seed
             model_nbr = -1;
+            max_iterations = -1;
 
             d = -0.1;
             d_comp = -0.1;
@@ -67,6 +68,7 @@ class InputData {
             width = -0.1;
             evap_time = -0.1;
             evap_left = -0.1;
+            max_error = -0.1;
 
             S_out = -0.1;
             c_out = -0.1;
@@ -115,6 +117,8 @@ class InputData {
                         seed = std::stoi(result.at(1));
                     if (result.at(0).compare("model_nbr") == 0)
                         model_nbr = std::stoi(result.at(1));
+                    if (result.at(0).compare("max_iterations") == 0)
+                        max_iterations = std::stoi(result.at(1));
                     if (result.at(0).compare("d") == 0)
                         d = std::stod(result.at(1));
                     if (result.at(0).compare("d_comp") == 0)
@@ -197,7 +201,8 @@ class InputData {
                         evap_time = std::stod(result.at(1));
                     if (result.at(0).compare("evap_left") == 0)
                         evap_left = std::stod(result.at(1));
-
+                    if (result.at(0).compare("max_error") == 0)
+                        max_error = std::stod(result.at(1));
 
                     if (result.at(0).compare("recX") == 0) {
                         for(unsigned int k = 1; k < result.size(); k++)
@@ -279,6 +284,7 @@ class InputData {
             if (N >= 0) appendDataToFile(filename,"N "+to_string_precision(N)+"\n");
             if (seed >= 0) appendDataToFile(filename,"seed "+to_string_precision(seed)+"\n");
             if (model_nbr >= 0) appendDataToFile(filename,"model_nbr "+to_string_precision(model_nbr)+"\n");
+            if (max_iterations >= 0) appendDataToFile(filename,"max_iterations "+to_string_precision(max_iterations)+"\n");
             if (d >= -0.05) appendDataToFile(filename,"d "+to_string_precision(d)+"\n");
             if (d_comp >= -0.05) appendDataToFile(filename,"d_comp "+to_string_precision(d_comp)+"\n");
             if (s >= -0.05) appendDataToFile(filename,"s "+to_string_precision(s)+"\n");
@@ -308,6 +314,7 @@ class InputData {
             if (S_out >= -0.05) appendDataToFile(filename,"S_out "+to_string_precision(S_out)+"\n");
             if (evap_time >= -0.05) appendDataToFile(filename,"evap_time "+to_string_precision(evap_time)+"\n");
             if (evap_left >= -0.05) appendDataToFile(filename,"evap_left "+to_string_precision(evap_left)+"\n");
+            if (max_error >= -0.05) appendDataToFile(filename,"max_error "+to_string_precision(max_error)+"\n");
 
             if (time_steps >= 0) appendDataToFile(filename,"time_steps "+to_string_precision(time_steps)+"\n");
             if (sample >= 0) appendDataToFile(filename,"sample "+to_string_precision(sample)+"\n");

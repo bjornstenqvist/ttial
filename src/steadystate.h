@@ -10,7 +10,7 @@
  * @param DeltaV potential difference over the entire mesh of vertical resistors
  * @param output_file name of output-file
  */
-void calcNodeAbsActivities(mat &res_hor, mat &res_ver, double DeltaV, double dy, std::string output_folder, std::string output_file) {
+void calcNodeAbsActivities(mat &res_hor, mat &res_ver, double DeltaV, double dy, std::string output_folder, std::string output_file, int max_iterations, double max_error) {
     // initialize nodes
     std::vector<Node> nodes;
     int nbr_of_nodes = res_hor.rows()*res_hor.cols();
@@ -27,11 +27,19 @@ void calcNodeAbsActivities(mat &res_hor, mat &res_ver, double DeltaV, double dy,
     vec I = vec::Zero(nbr_of_nodes);                 // initialize I matrix
     fillMatricesFromNodes(nodes,res_hor.cols(),res_hor.rows(),Rinv,I,DeltaV); // fill matrices and vector
 
-    // calculates inverse of Rinv - heart of program
-    //mat R = Rinv.inverse();                             // more effective for small systems (I think...)
-    mat R = splitInverse(Rinv);                           // more effective for large systems
-    // gets potential throughout the mesh
-    vec V = R*I;
+    // calculates potential - heart of program
+    vec V;
+    if(max_iterations > 0) {
+        double error = 2.0*max_error;
+        V = conjugateGradientMethod(Rinv,I*0.0,I,error,max_error,max_iterations);
+        appendDataToFile(output_file,"method conjugate gradient (numerical), error "+to_string_precision(error)+"\n");
+    } else {
+        //mat R = Rinv.inverse();                             // more effective for small systems (I think...)
+        mat R = splitInverse(Rinv);                           // more effective for large systems
+        V = R*I; // gets potential throughout the mesh
+        appendDataToFile(output_file,"method inverse (exact)\n");
+    }
+
     mat V_nodes = convertVector2Matrix(V,res_hor.rows(),res_hor.cols()); // convert potential in nodes from vector- to matrix-shape
     V_nodes = addBoundariesToMatrix(V_nodes,DeltaV,0.0);                  // add boundaries to potential matrix
     writeMatrixToFile(output_folder+"V_matrix.txt",V_nodes);                  // write potential to file
@@ -62,7 +70,7 @@ void steadystate(InputData ipd, mat varpi_hor, mat varpi_ver, mat s_hor, mat s_v
     writeMatrixToFile(ipd.output_folder+"res_ver.txt",res_ver);
 
     double dy = ipd.height/double(ipd.R+1);
-    calcNodeAbsActivities(res_hor,res_ver,ipd.DLambda,dy,ipd.output_folder,ipd.output_file); // perform main calculations, i.e. get potential in nodes
+    calcNodeAbsActivities(res_hor,res_ver,ipd.DLambda,dy,ipd.output_folder,ipd.output_file,ipd.max_iterations,ipd.max_error); // perform main calculations, i.e. get potential in nodes
     // generate output and end program
     mat Lambda_mat = loadMatrix(ipd.output_folder+"V_matrix.txt"); // load output from 'calcNodeAbsActivities' which is written to file
     calcProp(varpi_hor,varpi_ver,s_hor,s_ver,Lambda_mat,ipd.height,ipd.width,ipd.c_out,ipd.S_out,ipd.output_folder,ipd.output_file); // calculate concentrations and fluxes

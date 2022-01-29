@@ -385,3 +385,52 @@ void calcProp(mat &varpi_hor, mat &varpi_ver, mat &s_hor, mat &s_ver, mat &V_nod
     writeMatrixToFile(output_folder+"conc_ver_matrix.txt", concV);
     writeMatrixToFile(output_folder+"conc_hor_matrix.txt", concH);
 }
+
+/**
+ * @brief Algorithm to get the numerical solution to the linear equation 'A*x = b' where 'A' and 'b' are known.
+ * @param A matrix (must be positive-definite)
+ * @param x_0 vector, initial guess
+ * @param b vector
+ * @param max_error maximum (squared) error of the residual 'r_k = A*x_k - b' where 'k' index an iteration, using a least-square measure
+ * @param max_count maximum number of iterations before breaking
+ * @todo Fix reference
+ */
+vec conjugateGradientMethod(mat &A, vec x_0, vec &b, double &error, double max_error, int max_count) {
+    double summed_difference = (A-A.transpose()).cwiseAbs().sum();
+    double all_elements = A.cwiseAbs().sum();
+    if(summed_difference/all_elements > 1e-6)
+        std::cerr << "Matrix 'A' is not symmetric" << std::endl;
+    if(max_error < 0.0)
+        std::cerr << "Maximum squared error is negative" << std::endl;
+
+    int k = 0;
+    vec x_k = x_0;
+    vec r_k = b - A*x_k;
+    error = r_k.array().square().sum();
+    if(error < max_error)
+        return x_k;
+
+    vec p_k = r_k;
+    while(true && (k < max_count) ) {
+        double rktrk = double(r_k.transpose()*r_k);
+        vec Apk = A*p_k;
+        double alpha_k = rktrk/double(p_k.transpose()*Apk);
+        vec r_k1 = r_k - alpha_k*Apk;
+        error = r_k1.array().square().sum();
+        if(error < max_error) {
+            std::cout << "Found accurate potential after " << k << " iterations." << std::endl;
+            return ( x_k + alpha_k*p_k );
+        }
+
+        double beta_k = double(r_k1.transpose()*r_k1)/rktrk;
+        p_k = r_k1 + beta_k*p_k; // update p_k
+        x_k = x_k + alpha_k*p_k; // update x_k
+        r_k = r_k1; // update r_k
+        k++;
+        if(k % 10 == 0)
+            std::cout << "Iteration " << k << std::endl;
+    }
+
+    std::cerr << "Warning! Did not find accurate enough potential after " << k << " iterations." << std::endl;
+    return x_k;
+}

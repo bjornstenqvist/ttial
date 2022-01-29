@@ -570,7 +570,7 @@ void Geometry::brickAndMortarDualLinear(mat &s_hor, mat &s_ver, mat &s_nodes, ma
     name = "Brick and Mortar Gradient";
     width = ipd.d + ipd.s;
     height = double( ipd.N )*ipd.t + double( ipd.N-1 )*ipd.g;
-    double res_width = width / double( ipd.C );
+    //double res_width = width / double( ipd.C );
     double res_hight = height / double( 2*ipd.R + 1 );
 
     assert(("vertical top resistance in mortar cannot be negative" && ipd.S_mtv >= 0));
