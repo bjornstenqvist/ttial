@@ -1,7 +1,6 @@
 #pragma once
 #include "auxiliary.h"
 #include "nodes.h"
-#include "visual.h"
 
 /**
  * @brief Solves dc/dt = nabla dot j

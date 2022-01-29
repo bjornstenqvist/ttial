@@ -3,6 +3,7 @@
 #include <Eigen/Geometry>
 #include <fstream>
 #include <vector>
+#include "visual.h"
 
 typedef Eigen::MatrixXd mat;
 typedef Eigen::VectorXd vec;
@@ -395,7 +396,7 @@ void calcProp(mat &varpi_hor, mat &varpi_ver, mat &s_hor, mat &s_ver, mat &V_nod
  * @param max_count maximum number of iterations before breaking
  * @todo Fix reference
  */
-vec conjugateGradientMethod(mat &A, vec x_0, vec &b, double &error, double max_error, int max_count) {
+vec conjugateGradientMethod(mat &A, vec x_0, vec &b, double &error, double max_error, int max_count, bool display, int sample) {
     double summed_difference = (A-A.transpose()).cwiseAbs().sum();
     double all_elements = A.cwiseAbs().sum();
     if(summed_difference/all_elements > 1e-6)
@@ -403,12 +404,15 @@ vec conjugateGradientMethod(mat &A, vec x_0, vec &b, double &error, double max_e
     if(max_error < 0.0)
         std::cerr << "Maximum squared error is negative" << std::endl;
 
+    ProgressBar pb(max_count,display,70); // 70 is with of output
     int k = 0;
     vec x_k = x_0;
     vec r_k = b - A*x_k;
     error = r_k.array().square().sum();
-    if(error < max_error)
+    if(error < max_error) {
+        pb.end_of_process();
         return x_k;
+    }
 
     vec p_k = r_k;
     while(true && (k < max_count) ) {
@@ -418,6 +422,7 @@ vec conjugateGradientMethod(mat &A, vec x_0, vec &b, double &error, double max_e
         vec r_k1 = r_k - alpha_k*Apk;
         error = r_k1.array().square().sum();
         if(error < max_error) {
+            pb.end_of_process();
             std::cout << "Found accurate potential after " << k << " iterations." << std::endl;
             return ( x_k + alpha_k*p_k );
         }
@@ -427,10 +432,12 @@ vec conjugateGradientMethod(mat &A, vec x_0, vec &b, double &error, double max_e
         x_k = x_k + alpha_k*p_k; // update x_k
         r_k = r_k1; // update r_k
         k++;
-        if(k % 10 == 0)
-            std::cout << "Iteration " << k << std::endl;
-    }
 
+        ++pb;
+        if( k % sample == 0 )
+            pb.display();
+    }
+    pb.end_of_process();
     std::cerr << "Warning! Did not find accurate enough potential after " << k << " iterations." << std::endl;
     return x_k;
 }
