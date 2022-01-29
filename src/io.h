@@ -117,7 +117,7 @@ class InputData {
                         seed = std::stoi(result.at(1));
                     if (result.at(0).compare("model_nbr") == 0)
                         model_nbr = std::stoi(result.at(1));
-                    if (result.at(0).compare("max_iterations") == 0)
+                    if (result.at(0).compare("max_iter") == 0)
                         max_iterations = std::stoi(result.at(1));
                     if (result.at(0).compare("d") == 0)
                         d = std::stod(result.at(1));
@@ -284,7 +284,7 @@ class InputData {
             if (N >= 0) appendDataToFile(filename,"N "+to_string_precision(N)+"\n");
             if (seed >= 0) appendDataToFile(filename,"seed "+to_string_precision(seed)+"\n");
             if (model_nbr >= 0) appendDataToFile(filename,"model_nbr "+to_string_precision(model_nbr)+"\n");
-            if (max_iterations >= 0) appendDataToFile(filename,"max_iterations "+to_string_precision(max_iterations)+"\n");
+            if (max_iterations >= 0) appendDataToFile(filename,"max_iter "+to_string_precision(max_iterations)+"\n");
             if (d >= -0.05) appendDataToFile(filename,"d "+to_string_precision(d)+"\n");
             if (d_comp >= -0.05) appendDataToFile(filename,"d_comp "+to_string_precision(d_comp)+"\n");
             if (s >= -0.05) appendDataToFile(filename,"s "+to_string_precision(s)+"\n");
