@@ -436,6 +436,10 @@ vec conjugateGradientMethod(mat &A, vec x_0, vec &b, double &error, double max_e
         std::cerr << "Matrix 'A' is not symmetric" << std::endl;
     if(max_error < 0.0)
         std::cerr << "Maximum squared error is negative" << std::endl;
+    for(int r = 0; r < A.rows(); r++) {
+        if(A(r,r) < 0.0)
+            std::cerr << "Maximum squared error is negative" << std::endl;
+    }
 
     ProgressBar pb(max_count,display,70); // 70 is with of output
     int k = 0;
@@ -452,13 +456,22 @@ vec conjugateGradientMethod(mat &A, vec x_0, vec &b, double &error, double max_e
         double rktrk = double(r_k.transpose()*r_k);
         vec Apk = A*p_k;
         double alpha_k = rktrk/double(p_k.transpose()*Apk);
-        vec r_k1 = r_k - alpha_k*Apk;
+
         vec x_k1 = x_k + alpha_k*p_k;
+        vec r_k1;
+        if(k % 10 == 0) // the residual will accumulate round-off errors and therefore every tenth step it is updated in an exact mannor
+            r_k1 = b - A*x_k1;
+        else
+            r_k1 = r_k - alpha_k*Apk; // update residual, in theory exact expression but will in practice accumulate round-off errors
         error = r_k1.array().square().sum();
         if(error < max_error) {
-            pb.end_of_process();
-            appendDataToFile(output_file,"found accurate potential after "+to_string_precision(k)+" iterations.\n");
-            return x_k1;
+            r_k1 = b - A*x_k1; // update residual with exact value
+            error = r_k1.array().square().sum(); // calculate error with exact residual
+            if(error < max_error) { // double-check such that the requirement if fulfilled
+                pb.end_of_process();
+                appendDataToFile(output_file,"found accurate potential after "+to_string_precision(k)+" iterations.\n");
+                return x_k1;
+            }
         }
 
         double beta_k = double(r_k1.transpose()*r_k1)/rktrk;

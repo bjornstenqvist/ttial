@@ -19,6 +19,8 @@ class Geometry
         void brickAndMortar(mat &s_hor, mat &s_ver, mat &s_nodes, mat &D_hor, mat &D_ver, double &height, double &width, InputData ipd, std::string &name);
         void brickAndMortarEnglishBond(mat &s_hor, mat &s_ver, mat &s_nodes, mat &D_hor, mat &D_ver, double &height, double &width, InputData ipd, std::string &name);
         void brickAndMortarFlemishBond(mat &s_hor, mat &s_ver, mat &s_nodes, mat &D_hor, mat &D_ver, double &height, double &width, InputData ipd, std::string &name);
+        void brickAndMortarMonkBond(mat &s_hor, mat &s_ver, mat &s_nodes, mat &D_hor, mat &D_ver, double &height, double &width, InputData ipd, std::string &name);
+        void brickAndMortarSussexBond(mat &s_hor, mat &s_ver, mat &s_nodes, mat &D_hor, mat &D_ver, double &height, double &width, InputData ipd, std::string &name);
         void custom_made(mat &s_hor, mat &s_ver, mat &s_nodes, mat &D_hor, mat &D_ver, double &height, double &width, InputData ipd, std::string &name);
         void brickAndMortarDualLinear(mat &s_hor, mat &s_ver, mat &s_nodes, mat &D_hor, mat &D_ver, double &height, double &width, InputData ipd, std::string &name);
         void getGeometry(mat &s_hor, mat &s_ver, mat &s_nodes, mat &D_hor, mat &D_ver, InputData &ipd);
@@ -511,7 +513,85 @@ void Geometry::brickAndMortarFlemishBond(mat &s_hor, mat &s_ver, mat &s_nodes, m
     Geometry::checkInputForBrickAndMortar(ipd);
 
     name = "Brick and Mortar Flemish Bond";
+    int K = 2;
+    width = double(K-1)*ipd.d + double(K)*ipd.s + ipd.d_comp;
+    height = double( ipd.N )*ipd.t + double( ipd.N-1 )*ipd.g;
+
+    // fill geometry with mortar ("background")
+    s_ver = mat::Ones(ipd.R+1,ipd.C)*ipd.S_mv;
+    s_hor = mat::Ones(ipd.R,ipd.C)*ipd.S_mh;
+    s_nodes = mat::Ones(ipd.R,ipd.C)*ipd.S_mh;
+    D_ver = mat::Ones(ipd.R+1,ipd.C)*ipd.D_mv;
+    D_hor = mat::Ones(ipd.R,ipd.C)*ipd.D_mh;
+
+    // calculate brick centers
+    std::vector<double> xv, yv, dv, tv, Sv, Sh, Dv, Dh;
+    Geometry::getBricks(ipd,xv,yv,dv,tv,Sv,Sh,Dv,Dh,3,K);
+
+    fillGeometryWithRectanglesVer(s_ver,D_ver,Sv,Dv,xv,yv,dv,tv,width,height);
+    fillGeometryWithRectanglesHor(s_hor,D_hor,Sh,Dh,xv,yv,dv,tv,width,height);
+    fillGeometryWithRectanglesNodes(s_nodes,Sh,xv,yv,dv,tv,width,height);
+    insertRow(s_nodes,0,ipd.S_out);
+    s_nodes.conservativeResize(s_nodes.rows()+1, s_nodes.cols());
+    s_nodes.row(s_nodes.rows()-1) = ipd.S_out*vec::Ones(s_nodes.row(s_nodes.rows()-1).cols());
+}
+
+/**
+ * @brief Get solubility and diffusion coefficient matrices for a brick and mortar (Monk bond style) system
+ * @param s_hor Matrix of horizontal solubilities (will be set)
+ * @param s_ver Matrix of vertical solubilities (will be set)
+ * @param D_hor Matrix of horizontal diffusion coefficients (will be set)
+ * @param D_ver Matrix of vertical diffusion coefficients (will be set)
+ * @param height Height of system (will be set)
+ * @param width Width of system (will be set)
+ * @param ipd Input data for the system
+ * @param name Name of system (will be set)
+ * @note All input except 'ipd' is set using this function. All input data is supplied in 'ipd'.
+ */
+void Geometry::brickAndMortarMonkBond(mat &s_hor, mat &s_ver, mat &s_nodes, mat &D_hor, mat &D_ver, double &height, double &width, InputData ipd, std::string &name) {
+    Geometry::checkInputForBrickAndMortar(ipd);
+
+    name = "Brick and Mortar Monk Bond";
     int K = 3;
+    width = double(K-1)*ipd.d + double(K)*ipd.s + ipd.d_comp;
+    height = double( ipd.N )*ipd.t + double( ipd.N-1 )*ipd.g;
+
+    // fill geometry with mortar ("background")
+    s_ver = mat::Ones(ipd.R+1,ipd.C)*ipd.S_mv;
+    s_hor = mat::Ones(ipd.R,ipd.C)*ipd.S_mh;
+    s_nodes = mat::Ones(ipd.R,ipd.C)*ipd.S_mh;
+    D_ver = mat::Ones(ipd.R+1,ipd.C)*ipd.D_mv;
+    D_hor = mat::Ones(ipd.R,ipd.C)*ipd.D_mh;
+
+    // calculate brick centers
+    std::vector<double> xv, yv, dv, tv, Sv, Sh, Dv, Dh;
+    Geometry::getBricks(ipd,xv,yv,dv,tv,Sv,Sh,Dv,Dh,3,K);
+
+    fillGeometryWithRectanglesVer(s_ver,D_ver,Sv,Dv,xv,yv,dv,tv,width,height);
+    fillGeometryWithRectanglesHor(s_hor,D_hor,Sh,Dh,xv,yv,dv,tv,width,height);
+    fillGeometryWithRectanglesNodes(s_nodes,Sh,xv,yv,dv,tv,width,height);
+    insertRow(s_nodes,0,ipd.S_out);
+    s_nodes.conservativeResize(s_nodes.rows()+1, s_nodes.cols());
+    s_nodes.row(s_nodes.rows()-1) = ipd.S_out*vec::Ones(s_nodes.row(s_nodes.rows()-1).cols());
+}
+
+/**
+ * @brief Get solubility and diffusion coefficient matrices for a brick and mortar (Sussex bond style) system
+ * @param s_hor Matrix of horizontal solubilities (will be set)
+ * @param s_ver Matrix of vertical solubilities (will be set)
+ * @param D_hor Matrix of horizontal diffusion coefficients (will be set)
+ * @param D_ver Matrix of vertical diffusion coefficients (will be set)
+ * @param height Height of system (will be set)
+ * @param width Width of system (will be set)
+ * @param ipd Input data for the system
+ * @param name Name of system (will be set)
+ * @note All input except 'ipd' is set using this function. All input data is supplied in 'ipd'.
+ */
+void Geometry::brickAndMortarSussexBond(mat &s_hor, mat &s_ver, mat &s_nodes, mat &D_hor, mat &D_ver, double &height, double &width, InputData ipd, std::string &name) {
+    Geometry::checkInputForBrickAndMortar(ipd);
+
+    name = "Brick and Mortar Sussex Bond";
+    int K = 4;
     width = double(K-1)*ipd.d + double(K)*ipd.s + ipd.d_comp;
     height = double( ipd.N )*ipd.t + double( ipd.N-1 )*ipd.g;
 
@@ -690,8 +770,20 @@ void Geometry::getGeometry(mat &s_hor, mat &s_ver, mat &s_nodes, mat &D_hor, mat
         appendDataToFile(ipd.output_file,"model external\n");
     } else {
         std::string name = "";
-        if(ipd.model_nbr == 4) {
+        if(ipd.model_nbr == 6) {
             custom_made(s_hor,s_ver,s_nodes,D_hor,D_ver,ipd.height,ipd.width,ipd,name);
+        } else if(ipd.model_nbr == 5) {
+            brickAndMortarSussexBond(s_hor,s_ver,s_nodes,D_hor,D_ver,ipd.height,ipd.width,ipd,name);
+            appendDataToFile(ipd.output_file,"K_{M_ver/out} "+to_string_precision(ipd.S_mv/ipd.S_out) +"\n");
+            appendDataToFile(ipd.output_file,"K_{B_ver/out} "+to_string_precision(ipd.S_bv/ipd.S_out) +"\n");
+            appendDataToFile(ipd.output_file,"K_{M_ver/B_ver} "+to_string_precision(ipd.S_mv/ipd.S_bv) +"\n");
+            appendDataToFile(ipd.output_file,"K_{M_hor/B_hor} "+to_string_precision(ipd.S_mh/ipd.S_bh) +"\n");
+        } else if(ipd.model_nbr == 4) {
+            brickAndMortarMonkBond(s_hor,s_ver,s_nodes,D_hor,D_ver,ipd.height,ipd.width,ipd,name);
+            appendDataToFile(ipd.output_file,"K_{M_ver/out} "+to_string_precision(ipd.S_mv/ipd.S_out) +"\n");
+            appendDataToFile(ipd.output_file,"K_{B_ver/out} "+to_string_precision(ipd.S_bv/ipd.S_out) +"\n");
+            appendDataToFile(ipd.output_file,"K_{M_ver/B_ver} "+to_string_precision(ipd.S_mv/ipd.S_bv) +"\n");
+            appendDataToFile(ipd.output_file,"K_{M_hor/B_hor} "+to_string_precision(ipd.S_mh/ipd.S_bh) +"\n");
         } else if(ipd.model_nbr == 3) {
             brickAndMortarFlemishBond(s_hor,s_ver,s_nodes,D_hor,D_ver,ipd.height,ipd.width,ipd,name);
             appendDataToFile(ipd.output_file,"K_{M_ver/out} "+to_string_precision(ipd.S_mv/ipd.S_out) +"\n");
