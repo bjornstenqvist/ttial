@@ -38,14 +38,14 @@ void calcNodeAbsActivities(mat &res_hor, mat &res_ver, double DeltaV, double dy,
         } else {
             appendDataToFile(output_file,"initial guess in Conjugate Gradient Method has been loaded from file: "+init_guess+"\n");
         }
-        V = conjugateGradientMethod(Rinv,V_guess,I,error,max_error,max_iterations,display,sample,output_file);
+        V = conjugateGradientMethod(Rinv,V_guess,I,error,max_error,max_iterations,display,sample,output_file,output_folder);
         writeMatrixToFile(output_folder+"V_vec_last_iteration.txt",V);
-        appendDataToFile(output_file,"method conjugate gradient (numerical), error "+to_string_precision((Rinv*V - I).array().square().sum())+"\n");
+        appendDataToFile(output_file,"method conjugate gradient (numerical), error "+to_string_precision((Rinv*V - I).array().square().sum()/double(Rinv.rows()))+"\n");
     } else {
         //mat R = Rinv.inverse();                             // more effective for small systems (I think...)
         mat R = splitInverse(Rinv);                           // more effective for large systems
         V = R*I; // gets potential throughout the mesh
-        appendDataToFile(output_file,"method inverse (exact), error "+to_string_precision((Rinv*V - I).array().square().sum())+"\n");
+        appendDataToFile(output_file,"method inverse (exact), error "+to_string_precision((Rinv*V - I).array().square().sum()/double(Rinv.rows()))+"\n");
     }
 
     mat V_nodes = convertVector2Matrix(V,res_hor.rows(),res_hor.cols()); // convert potential in nodes from vector- to matrix-shape

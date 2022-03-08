@@ -275,24 +275,29 @@ void Geometry::getBricks(InputData ipd, std::vector<double> &xv, std::vector<dou
     Sh.resize(0);
     Dv.resize(0);
     Dh.resize(0);
+    double ran = 0.0;  // ran = 0.0 && ran2 = 1.0, gives uniform features
+    double ran2 = 1.0;  // ran = 1.0 && ran2 = 0.0, gives random features
+    double minR = 0.8;
+    double maxR = 1.2;
 
     if(model == 0) { // Stretcher bond (Brick and Mortar original)
         double width = ipd.d + ipd.s;
         for(int n = 0; n < ipd.N; n += 2) {
             for(int i = 0; i < 2; i++) {
+                double rn = ran2 + ran*randomUnit(minR,maxR);
                 dv.push_back(ipd.d);
                 tv.push_back(ipd.t);
-                Sv.push_back(ipd.S_bv);
-                Sh.push_back(ipd.S_bh);
-                Dv.push_back(ipd.D_bv);
-                Dh.push_back(ipd.D_bh);
+                Sv.push_back(ipd.S_bv*rn);
+                Sh.push_back(ipd.S_bh*rn);
+                Dv.push_back(ipd.D_bv*rn);
+                Dh.push_back(ipd.D_bh*rn);
             }
             yv.push_back(ipd.t/2.0 + n*(ipd.t+ipd.g));
             yv.push_back(ipd.t/2.0 + (n+1)*(ipd.t+ipd.g));
 
             if(ipd.omega < 0.0) {
-                xv.push_back(randomUnit(0.0,1.0)*width);
-                xv.push_back(randomUnit(0.0,1.0)*width);
+                xv.push_back(randomUnit(minR,maxR)*width);
+                xv.push_back(randomUnit(minR,maxR)*width);
             } else {
                 xv.push_back(ipd.d/2.0);
                 xv.push_back(ipd.d/2.0 + ipd.omega*width/(1.0+ipd.omega));
@@ -301,24 +306,26 @@ void Geometry::getBricks(InputData ipd, std::vector<double> &xv, std::vector<dou
     } else if(model == 2) { // English Bond (Blockförband)
         double width = ipd.d + ipd.s;
         for(int n = 0; n < ipd.N; n += 2) {
-
+            double rn = ran2 + ran*randomUnit(minR,maxR);
             tv.push_back(ipd.t);
-            Sv.push_back(ipd.S_bv);
-            Sh.push_back(ipd.S_bh);
-            Dv.push_back(ipd.D_bv);
-            Dh.push_back(ipd.D_bh);
+            Sv.push_back(ipd.S_bv*rn);
+            Sh.push_back(ipd.S_bh*rn);
+            Dv.push_back(ipd.D_bv*rn);
+            Dh.push_back(ipd.D_bh*rn);
 
+            rn = ran2 + ran*randomUnit(minR,maxR);
             tv.push_back(ipd.t);
-            Sv.push_back(ipd.S_comp_bv);
-            Sh.push_back(ipd.S_comp_bh);
-            Dv.push_back(ipd.D_comp_bv);
-            Dh.push_back(ipd.D_comp_bh);
+            Sv.push_back(ipd.S_comp_bv*rn);
+            Sh.push_back(ipd.S_comp_bh*rn);
+            Dv.push_back(ipd.D_comp_bv*rn);
+            Dh.push_back(ipd.D_comp_bh*rn);
 
+            rn = ran2 + ran*randomUnit(minR,maxR);
             tv.push_back(ipd.t);
-            Sv.push_back(ipd.S_comp_bv);
-            Sh.push_back(ipd.S_comp_bh);
-            Dv.push_back(ipd.D_comp_bv);
-            Dh.push_back(ipd.D_comp_bh);
+            Sv.push_back(ipd.S_comp_bv*rn);
+            Sh.push_back(ipd.S_comp_bh*rn);
+            Dv.push_back(ipd.D_comp_bv*rn);
+            Dh.push_back(ipd.D_comp_bh*rn);
 
             dv.push_back(ipd.d);
             dv.push_back((ipd.d-ipd.s)/2.0);
@@ -329,8 +336,8 @@ void Geometry::getBricks(InputData ipd, std::vector<double> &xv, std::vector<dou
             yv.push_back(ipd.t/2.0 + (n+1)*(ipd.t+ipd.g));
 
             if(ipd.omega < 0.0) {
-                xv.push_back(randomUnit(0.0,1.0)*width);
-                xv.push_back(randomUnit(0.0,1.0)*width);
+                xv.push_back(randomUnit(minR,maxR)*width);
+                xv.push_back(randomUnit(minR,maxR)*width);
             } else {
                 xv.push_back(ipd.d/2.0);
                 xv.push_back(ipd.d/2.0 + ipd.omega*width/(1.0+ipd.omega));
@@ -343,15 +350,16 @@ void Geometry::getBricks(InputData ipd, std::vector<double> &xv, std::vector<dou
         for(int n = 0; n < ipd.N; n += 2) {
             for(int m = 0; m < 2; m++) { // for line 'n' and line 'n+1'
                 for(int k = 0; k < K-1; k++) { // bricks
+                    double rn = ran2 + ran*randomUnit(minR,maxR);
                     dv.push_back(ipd.d);
                     tv.push_back(ipd.t);
-                    Sv.push_back(ipd.S_bv);
-                    Sh.push_back(ipd.S_bh);
-                    Dv.push_back(ipd.D_bv);
-                    Dh.push_back(ipd.D_bh);
+                    Sv.push_back(ipd.S_bv*rn);
+                    Sh.push_back(ipd.S_bh*rn);
+                    Dv.push_back(ipd.D_bv*rn);
+                    Dh.push_back(ipd.D_bh*rn);
                     yv.push_back(ipd.t/2.0 + (n+m)*(ipd.t+ipd.g));
                     if(ipd.omega < 0.0 && k == 0) {
-                        xv.push_back(randomUnit(0.0,1.0)*width);
+                        xv.push_back(randomUnit(minR,maxR)*width);
                     } else if(ipd.omega >= 0.0 && k == 0 && m == 0) {
                         xv.push_back(0.0);
                     } else if(ipd.omega >= 0.0 && k == 0 && m == 1) {
@@ -362,12 +370,13 @@ void Geometry::getBricks(InputData ipd, std::vector<double> &xv, std::vector<dou
                     }
                 }
                 // complementary brick
+                double rn = ran2 + ran*randomUnit(minR,maxR);
                 dv.push_back(ipd.d_comp);
                 tv.push_back(ipd.t);
-                Sv.push_back(ipd.S_comp_bv);
-                Sh.push_back(ipd.S_comp_bh);
-                Dv.push_back(ipd.D_comp_bv);
-                Dh.push_back(ipd.D_comp_bh);
+                Sv.push_back(ipd.S_comp_bv*rn);
+                Sh.push_back(ipd.S_comp_bh*rn);
+                Dv.push_back(ipd.D_comp_bv*rn);
+                Dh.push_back(ipd.D_comp_bh*rn);
                 yv.push_back(ipd.t/2.0 + (n+m)*(ipd.t+ipd.g));
                 xv.push_back(xv.back()+ipd.d/2.0+ipd.d_comp/2.0+ipd.s);
             }

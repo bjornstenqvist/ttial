@@ -1,7 +1,20 @@
+#pragma once
 #include <iostream>
 #include <chrono>
 #include <vector>
 #include <cmath>
+
+std::string getTimeString2(double timed) {
+    int days = int(timed/86400.0);
+    timed -= double(days)*86400.0;
+    int hours = int(timed/3600.0);
+    timed -= double(hours)*3600.0;
+    int minutes = int(timed/60.0);
+    timed -= double(minutes)*60.0;
+    int seconds = int(timed);
+    std::string str = " "+std::to_string(days)+"days "+std::to_string(hours)+"hour "+std::to_string(minutes)+"min "+std::to_string(seconds)+"sec";
+    return str;
+}
 
 class ProgressBar {
     private:
@@ -33,8 +46,9 @@ class ProgressBar {
                 for(int n = pos+1; n < bar_width; n++)
                     std::cout << none;
 
-                std::cout << "] " << int(where * 100.0) << "% "
-                    << double(time) / 1000.0 << "s\r";
+                //std::cout << "] " << int(where * 100.0) << "% " << double(time) / 1000.0 << "s\r";
+                double time_left = time/1000*(1.0 - where)/where;
+                std::cout << "] " << int(where * 100.0) << "% " << std::setw(10) << "Est. " << getTimeString2(time_left) << "\r";
                 std::cout.flush();
             }
         }
